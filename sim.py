@@ -62,27 +62,29 @@ possibleChoices = []
 #possibleChoices.append(Pet('Ant', 2, 1, 1, 3, False))
 possibleChoices.append(Pet('Beaver', 2, 2, 1, 3, False))
 #possibleChoices.append(Pet('Cricket', 1, 2, 1, 3, False))
-#possibleChoices.append(Pet('Duck', 1, 2, 1, 3, False))
+possibleChoices.append(Pet('Duck', 1, 2, 1, 3, False))
 possibleChoices.append(Pet('Fish', 2, 3, 1, 3, False))
 #possibleChoices.append(Pet('Horse', 1, 1, 1, 3, False))
 #possibleChoices.append(Pet('Mosquito', 2, 2, 1, 3, False))
 #possibleChoices.append(Pet('Otter', 1, 2, 1, 3, False))
 #possibleChoices.append(Pet('Pig', 2, 2, 1, 3, False))
-possibleChoices.append('HONEY 1')
-possibleChoices.append('HONEY 2')
-possibleChoices.append('HONEY 3')
-possibleChoices.append('APPLE 1')
-possibleChoices.append('APPLE 2')
-possibleChoices.append('APPLE 3')
+#possibleChoices.append('HONEY 1')
+#possibleChoices.append('HONEY 2')
+#possibleChoices.append('HONEY 3')
+#possibleChoices.append('APPLE 1')
+#possibleChoices.append('APPLE 2')
+#possibleChoices.append('APPLE 3')
 possibleChoices.append('SELL 1')
 possibleChoices.append('SELL 2')
 possibleChoices.append('SELL 3')
 possibleChoices.append('DONE')
 
+duckCount = 0
+
 choice = None
 
 
-baseNode = Node(name='', gold=10, squad=[])
+baseNode = Node(name='', gold=10, squad=[], bonusChoices=[])
 
 leaves = findall(baseNode, filter_=lambda node: len(node.children) == 0 and 'DONE' not in node.name)
 
@@ -97,14 +99,14 @@ while (len(leaves) > 0):
         #print()
         
         legalChoices = 0
-        for choice in possibleChoices:
+        for choice in possibleChoices + leaf.bonusChoices:
             choiceCopy = copy.deepcopy(choice)
             if choiceCopy == 'DONE':
                 #print('DONE')
                 if (legalChoices == 0):
                     leaf.name = '{0} - DONE'.format(leaf.name)
                 else:
-                    Node(name = '{0} - DONE'.format(leaf.squad), gold = leaf.gold, squad = leaf.squad, parent = leaf)
+                    Node(name = '{0} - DONE'.format(leaf.squad), gold = leaf.gold, squad = leaf.squad, bonusChoices = leaf.bonusChoices, parent = leaf)
 
             else:
                 if (choiceCopy == 'HONEY 1'):
@@ -116,7 +118,7 @@ while (len(leaves) > 0):
                     honeySquad = copy.deepcopy(leaf.squad)
                     honeySquad[0].honey = True
 
-                    Node(name = honeySquad, gold = leaf.gold - 3, squad = honeySquad, parent = leaf)
+                    Node(name = honeySquad, gold = leaf.gold - 3, squad = honeySquad, bonusChoices = leaf.bonusChoices, parent = leaf)
                     legalChoices += 1
                 elif(choiceCopy == 'HONEY 2'):
                     if (len(leaf.squad) < 2 or leaf.gold < 3):
@@ -127,7 +129,7 @@ while (len(leaves) > 0):
                     honeySquad = copy.deepcopy(leaf.squad)
                     honeySquad[1].honey = True
 
-                    Node(name = honeySquad, gold = leaf.gold - 3, squad = honeySquad, parent = leaf)
+                    Node(name = honeySquad, gold = leaf.gold - 3, squad = honeySquad, bonusChoices = leaf.bonusChoices, parent = leaf)
                     legalChoices += 1
                 elif(choiceCopy == 'HONEY 3'):
                     if (len(leaf.squad) < 3 or leaf.gold < 3):
@@ -138,7 +140,7 @@ while (len(leaves) > 0):
                     honeySquad = copy.deepcopy(leaf.squad)
                     honeySquad[2].honey = True
 
-                    Node(name = honeySquad, gold = leaf.gold - 3, squad = honeySquad, parent = leaf)
+                    Node(name = honeySquad, gold = leaf.gold - 3, squad = honeySquad, bonusChoices = leaf.bonusChoices, parent = leaf)
                     legalChoices += 1
                 elif(choiceCopy == 'APPLE 1'):
                     if (len(leaf.squad) < 1 or leaf.gold < 3):
@@ -151,7 +153,7 @@ while (len(leaves) > 0):
                     appleSquad[0].toughness += 1
                     #appleSquad[0].name += ' (apple)'
 
-                    Node(name = appleSquad, gold = leaf.gold - 3, squad = appleSquad, parent = leaf)
+                    Node(name = appleSquad, gold = leaf.gold - 3, squad = appleSquad, bonusChoices = leaf.bonusChoices, parent = leaf)
                     legalChoices += 1
                 elif(choiceCopy == 'APPLE 2'):
                     if (len(leaf.squad) < 2 or leaf.gold < 3):
@@ -164,7 +166,7 @@ while (len(leaves) > 0):
                     appleSquad[1].toughness += 1
                     #appleSquad[1].name += ' (apple)'
 
-                    Node(name = appleSquad, gold = leaf.gold - 3, squad = appleSquad, parent = leaf)
+                    Node(name = appleSquad, gold = leaf.gold - 3, squad = appleSquad, bonusChoices = leaf.bonusChoices, parent = leaf)
                     legalChoices += 1
                 elif(choiceCopy == 'APPLE 3'):
                     if (len(leaf.squad) < 3 or leaf.gold < 3):
@@ -177,7 +179,7 @@ while (len(leaves) > 0):
                     appleSquad[2].toughness += 1
                     #appleSquad[2].name += ' (apple)'
 
-                    Node(name = appleSquad, gold = leaf.gold - 3, squad = appleSquad, parent = leaf)
+                    Node(name = appleSquad, gold = leaf.gold - 3, squad = appleSquad, bonusChoices = leaf.bonusChoices, parent = leaf)
                     legalChoices += 1
                 elif(choiceCopy == 'SELL 1'):
                     if (len(leaf.squad) < 1):
@@ -186,9 +188,25 @@ while (len(leaves) > 0):
                     #print('SELL 1')
 
                     sellSquad = copy.deepcopy(leaf.squad)
-                    change = sellSquad.pop(0).level
+                    soldFriend = sellSquad.pop(0)
+                    change = soldFriend.level
 
-                    Node(name = str(sellSquad) + ' (sold 1)', gold = leaf.gold + change, squad = sellSquad, parent = leaf)
+                    if ('Beaver' in soldFriend.name):
+                        # Add health to other units. We are always limited to 3 units in these scenarios, so we can just blindly apply it to all units
+                        for friend in sellSquad:
+                            friend.toughness += soldFriend.level
+                    elif ('Duck' in soldFriend.name):
+                        # Add extra possible choices to the list for each animal FOR THIS LEAF ONLY
+                        bonusChoices = copy.deepcopy(leaf.bonusChoices)
+                        for choice in [copy.deepcopy(choice) for choice in possibleChoices if isinstance(choice, Pet)]:
+                            buffedChoice = choice
+                            buffedChoice.power += soldFriend.level
+                            buffedChoice.toughness += soldFriend.level
+                            bonusChoices.append(buffedChoice)
+                        Node(name = str(sellSquad) + ' (sold 1)', gold = leaf.gold + change, squad = sellSquad, bonusChoices = bonusChoices, parent = leaf)
+                        continue
+
+                    Node(name = str(sellSquad) + ' (sold 1)', gold = leaf.gold + change, squad = sellSquad, bonusChoices = leaf.bonusChoices, parent = leaf)
                     legalChoices += 1
                 elif(choiceCopy == 'SELL 2'):
                     if (len(leaf.squad) < 2):
@@ -197,9 +215,25 @@ while (len(leaves) > 0):
                     #print('SELL 2')
 
                     sellSquad = copy.deepcopy(leaf.squad)
-                    change = sellSquad.pop(0).level
+                    soldFriend = sellSquad.pop(1)
+                    change = soldFriend.level
 
-                    Node(name = str(sellSquad) + ' (sold 2)', gold = leaf.gold + change, squad = sellSquad, parent = leaf)
+                    if ('Beaver' in soldFriend.name):
+                        # Add health to other units. We are always limited to 3 units in these scenarios, so we can just blindly apply it to all units
+                        for friend in sellSquad:
+                            friend.toughness += soldFriend.level
+                    elif ('Duck' in soldFriend.name):
+                        # Add extra possible choices to the list for each animal FOR THIS LEAF ONLY
+                        bonusChoices = copy.deepcopy(leaf.bonusChoices)
+                        for choice in [copy.deepcopy(choice) for choice in possibleChoices if isinstance(choice, Pet)]:
+                            buffedChoice = choice
+                            buffedChoice.power += soldFriend.level
+                            buffedChoice.toughness += soldFriend.level
+                            bonusChoices.append(buffedChoice)
+                        Node(name = str(sellSquad) + ' (sold 2)', gold = leaf.gold + change, squad = sellSquad, bonusChoices = bonusChoices, parent = leaf)
+                        continue
+
+                    Node(name = str(sellSquad) + ' (sold 1)', gold = leaf.gold + change, squad = sellSquad, bonusChoices = leaf.bonusChoices, parent = leaf)
                     legalChoices += 1
                 elif(choiceCopy == 'SELL 3'):
                     if (len(leaf.squad) < 3):
@@ -208,9 +242,25 @@ while (len(leaves) > 0):
                     #print('SELL 3')
 
                     sellSquad = copy.deepcopy(leaf.squad)
-                    change = sellSquad.pop(2).level
+                    soldFriend = sellSquad.pop(2)
+                    change = soldFriend.level
 
-                    Node(name = str(sellSquad) + ' (sold 3)', gold = leaf.gold + change, squad = sellSquad, parent = leaf)
+                    if ('Beaver' in soldFriend.name):
+                        # Add health to other units. We are always limited to 3 units in these scenarios, so we can just blindly apply it to all units
+                        for friend in sellSquad:
+                            friend.toughness += soldFriend.level
+                    elif ('Duck' in soldFriend.name):
+                        # Add extra possible choices to the list for each animal FOR THIS LEAF ONLY
+                        bonusChoices = copy.deepcopy(leaf.bonusChoices)
+                        for choice in [copy.deepcopy(choice) for choice in possibleChoices if isinstance(choice, Pet)]:
+                            buffedChoice = choice
+                            buffedChoice.power += soldFriend.level
+                            buffedChoice.toughness += soldFriend.level
+                            bonusChoices.append(buffedChoice)
+                        Node(name = str(sellSquad) + ' (sold 3)', gold = leaf.gold + change, squad = sellSquad, bonusChoices = bonusChoices, parent = leaf)
+                        continue
+
+                    Node(name = str(sellSquad) + ' (sold 1)', gold = leaf.gold + change, squad = sellSquad, bonusChoices = leaf.bonusChoices, parent = leaf)
                     legalChoices += 1
                 #elif(choiceCopy == 'COMBINE'):
                 else:
@@ -255,9 +305,9 @@ while (len(leaves) > 0):
                                         postBuffSquad[buffIndex] = buffedUnit
                                         postBuffSquad[index] = copy.deepcopy(squad[index])
 
-                                        Node(name = postBuffSquad, gold = gold, squad = postBuffSquad, parent = leaf)
+                                        Node(name = postBuffSquad, gold = gold, squad = postBuffSquad, bonusChoices = leaf.bonusChoices, parent = leaf)
                             else:
-                                Node(name = squad, gold = gold, squad = squad, parent = leaf)
+                                Node(name = squad, gold = gold, squad = squad, bonusChoices = leaf.bonusChoices, parent = leaf)
                         else:
                             #print('invalid pet name - was {0} expecting {1}'.format(member.name, petName))
                             pass
@@ -281,11 +331,11 @@ while (len(leaves) > 0):
                             postBuffSquad[buffIndex] = buffedUnit
 
                             
-                            Node(name = postBuffSquad, gold = gold, squad = postBuffSquad, parent = leaf)
+                            Node(name = postBuffSquad, gold = gold, squad = postBuffSquad, bonusChoices = leaf.bonusChoices, parent = leaf)
                         if len(squad) == 0:
                             # Add the purchased pet to the end of the list
                             squad = copy.deepcopy(leaf.squad) + [choiceCopy]
-                            Node(name = squad, gold = gold, squad = squad, parent = leaf)
+                            Node(name = squad, gold = gold, squad = squad, bonusChoices = leaf.bonusChoices, parent = leaf)
                     else:
                         # Add the purchased pet to the end of the list
 
@@ -293,7 +343,7 @@ while (len(leaves) > 0):
                         choiceCopy.power += horsePower
 
                         squad = copy.deepcopy(leaf.squad) + [choiceCopy]
-                        Node(name = squad, gold = gold, squad = squad, parent = leaf)
+                        Node(name = squad, gold = gold, squad = squad, bonusChoices = leaf.bonusChoices, parent = leaf)
 
     leaves = findall(baseNode, filter_=lambda node: len(node.children) == 0 and 'DONE' not in node.name)
     
@@ -305,9 +355,10 @@ while (len(leaves) > 0):
     print('found {0} leaves'.format(len(leaves)))
     input()
 
-allSquadNodes = findall(baseNode, filter_=lambda node: len(node.children) == 0)
+allSquadNodes = findall(baseNode, filter_=lambda node: 'DONE' in node.name)
 allSquads = [node.squad for node in allSquadNodes]
 allSquadStrings = [str(squad) for squad in allSquads]
+
 allUniqueSquadStrings = list(set(allSquadStrings))
 allUniqueSquadStrings.sort()
 
