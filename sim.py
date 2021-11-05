@@ -4,7 +4,7 @@ import copy
 from anytree import Node, RenderTree, PreOrderIter, findall
 
 class Pet:
-    name = ""
+    name =''
     power = 0
     toughness = 0
     level = 1
@@ -26,6 +26,22 @@ class Pet:
     def __str__(self):
         return '{0} L{1} ({2} / {3}){4}'.format(self.name, self.level, self.power, self.toughness,' (honey)' if self.honey else '')
     
+    def __eq__(self, other):
+        if not isinstance(other, Pet):
+            return NotImplemented
+        if self.name != other.name:
+            return False
+        elif self.power != other.power:
+            return False
+        elif self.toughness != other.toughness:
+            return False
+        elif self.level != other.level:
+            return False
+        elif self.honey != other.honey:
+            return False
+        else:
+            return True
+    
     def combineWith(self, pet, team, bought=False):
         self.power = max(self.power, pet.power) + 1
         self.toughness = max(self.toughness, pet.toughness) + 1
@@ -43,24 +59,24 @@ class Pet:
 choiceDict = {}
 
 possibleChoices = []
-possibleChoices.append(Pet('Ant', 2, 1, 1, 3, False))
+#possibleChoices.append(Pet('Ant', 2, 1, 1, 3, False))
 possibleChoices.append(Pet('Beaver', 2, 2, 1, 3, False))
-possibleChoices.append(Pet('Cricket', 1, 2, 1, 3, False))
-possibleChoices.append(Pet('Duck', 1, 2, 1, 3, False))
+#possibleChoices.append(Pet('Cricket', 1, 2, 1, 3, False))
+#possibleChoices.append(Pet('Duck', 1, 2, 1, 3, False))
 possibleChoices.append(Pet('Fish', 2, 3, 1, 3, False))
-possibleChoices.append(Pet('Horse', 1, 1, 1, 3, False))
-possibleChoices.append(Pet('Mosquito', 2, 2, 1, 3, False))
-possibleChoices.append(Pet('Otter', 1, 2, 1, 3, False))
-possibleChoices.append(Pet('Pig', 2, 2, 1, 3, False))
-possibleChoices.append('HONEY1')
-possibleChoices.append('HONEY2')
-possibleChoices.append('HONEY3')
-possibleChoices.append('APPLE1')
-possibleChoices.append('APPLE2')
-possibleChoices.append('APPLE3')
-#possibleChoices.append('SELL 1')
-#possibleChoices.append('SELL 2')
-#possibleChoices.append('SELL 3')
+#possibleChoices.append(Pet('Horse', 1, 1, 1, 3, False))
+#possibleChoices.append(Pet('Mosquito', 2, 2, 1, 3, False))
+#possibleChoices.append(Pet('Otter', 1, 2, 1, 3, False))
+#possibleChoices.append(Pet('Pig', 2, 2, 1, 3, False))
+possibleChoices.append('HONEY 1')
+possibleChoices.append('HONEY 2')
+possibleChoices.append('HONEY 3')
+possibleChoices.append('APPLE 1')
+possibleChoices.append('APPLE 2')
+possibleChoices.append('APPLE 3')
+possibleChoices.append('SELL 1')
+possibleChoices.append('SELL 2')
+possibleChoices.append('SELL 3')
 possibleChoices.append('DONE')
 
 choice = None
@@ -73,100 +89,129 @@ leaves = findall(baseNode, filter_=lambda node: len(node.children) == 0 and 'DON
 while (len(leaves) > 0):
     for leaf in leaves:
 
-        print()
-        print('iterating choices for the following leaf:')
-        for pre, fill, node in RenderTree(leaf):
-            print('{0}{1} - {2}g'.format(pre, node.name, node.gold))
-            pass
-        print()
+        #print()
+        #print('iterating choices for the following leaf:')
+        #for pre, fill, node in RenderTree(leaf):
+        #    print('{0}{1} - {2}g'.format(pre, node.name, node.gold))
+        #    pass
+        #print()
         
         legalChoices = 0
         for choice in possibleChoices:
             choiceCopy = copy.deepcopy(choice)
             if choiceCopy == 'DONE':
-                print('DONE')
-                print(legalChoices)
+                #print('DONE')
                 if (legalChoices == 0):
                     leaf.name = '{0} - DONE'.format(leaf.name)
                 else:
                     Node(name = '{0} - DONE'.format(leaf.squad), gold = leaf.gold, squad = leaf.squad, parent = leaf)
 
             else:
-                if (choiceCopy == 'HONEY1'):
+                if (choiceCopy == 'HONEY 1'):
                     if (len(leaf.squad) < 1 or leaf.gold < 3):
                         continue
 
-                    print('HONEY1')
+                    #print('HONEY 1')
                     
                     honeySquad = copy.deepcopy(leaf.squad)
                     honeySquad[0].honey = True
 
                     Node(name = honeySquad, gold = leaf.gold - 3, squad = honeySquad, parent = leaf)
                     legalChoices += 1
-                elif(choiceCopy == 'HONEY2'):
+                elif(choiceCopy == 'HONEY 2'):
                     if (len(leaf.squad) < 2 or leaf.gold < 3):
                         continue
 
-                    print('HONEY2')
+                    #print('HONEY 2')
                     
                     honeySquad = copy.deepcopy(leaf.squad)
                     honeySquad[1].honey = True
 
                     Node(name = honeySquad, gold = leaf.gold - 3, squad = honeySquad, parent = leaf)
                     legalChoices += 1
-                elif(choiceCopy == 'HONEY3'):
+                elif(choiceCopy == 'HONEY 3'):
                     if (len(leaf.squad) < 3 or leaf.gold < 3):
                         continue
 
-                    print('HONEY3')
+                    #print('HONEY 3')
                     
                     honeySquad = copy.deepcopy(leaf.squad)
                     honeySquad[2].honey = True
 
                     Node(name = honeySquad, gold = leaf.gold - 3, squad = honeySquad, parent = leaf)
                     legalChoices += 1
-                elif(choiceCopy == 'APPLE1'):
+                elif(choiceCopy == 'APPLE 1'):
                     if (len(leaf.squad) < 1 or leaf.gold < 3):
                         continue
 
-                    print('APPLE1')
+                    #print('APPLE 1')
                     
                     appleSquad = copy.deepcopy(leaf.squad)
                     appleSquad[0].power += 1
                     appleSquad[0].toughness += 1
+                    #appleSquad[0].name += ' (apple)'
 
                     Node(name = appleSquad, gold = leaf.gold - 3, squad = appleSquad, parent = leaf)
                     legalChoices += 1
-                elif(choiceCopy == 'APPLE2'):
+                elif(choiceCopy == 'APPLE 2'):
                     if (len(leaf.squad) < 2 or leaf.gold < 3):
                         continue
 
-                    print('APPLE2')
+                    #print('APPLE 2')
                     
                     appleSquad = copy.deepcopy(leaf.squad)
                     appleSquad[1].power += 1
                     appleSquad[1].toughness += 1
+                    #appleSquad[1].name += ' (apple)'
 
                     Node(name = appleSquad, gold = leaf.gold - 3, squad = appleSquad, parent = leaf)
                     legalChoices += 1
-                elif(choiceCopy == 'APPLE3'):
+                elif(choiceCopy == 'APPLE 3'):
                     if (len(leaf.squad) < 3 or leaf.gold < 3):
                         continue
 
-                    print('APPLE3')
+                    #print('APPLE 3')
                     
                     appleSquad = copy.deepcopy(leaf.squad)
                     appleSquad[2].power += 1
                     appleSquad[2].toughness += 1
+                    #appleSquad[2].name += ' (apple)'
 
                     Node(name = appleSquad, gold = leaf.gold - 3, squad = appleSquad, parent = leaf)
                     legalChoices += 1
                 elif(choiceCopy == 'SELL 1'):
-                    continue
+                    if (len(leaf.squad) < 1):
+                        continue
+
+                    #print('SELL 1')
+
+                    sellSquad = copy.deepcopy(leaf.squad)
+                    change = sellSquad.pop(0).level
+
+                    Node(name = str(sellSquad) + ' (sold 1)', gold = leaf.gold + change, squad = sellSquad, parent = leaf)
+                    legalChoices += 1
                 elif(choiceCopy == 'SELL 2'):
-                    continue
+                    if (len(leaf.squad) < 2):
+                        continue
+
+                    #print('SELL 2')
+
+                    sellSquad = copy.deepcopy(leaf.squad)
+                    change = sellSquad.pop(0).level
+
+                    Node(name = str(sellSquad) + ' (sold 2)', gold = leaf.gold + change, squad = sellSquad, parent = leaf)
+                    legalChoices += 1
                 elif(choiceCopy == 'SELL 3'):
-                    continue
+                    if (len(leaf.squad) < 3):
+                        continue
+
+                    #print('SELL 3')
+
+                    sellSquad = copy.deepcopy(leaf.squad)
+                    change = sellSquad.pop(2).level
+
+                    Node(name = str(sellSquad) + ' (sold 3)', gold = leaf.gold + change, squad = sellSquad, parent = leaf)
+                    legalChoices += 1
                 #elif(choiceCopy == 'COMBINE'):
                 else:
 
@@ -176,13 +221,13 @@ while (len(leaves) > 0):
                         continue
 
                     # We chose a pet
-                    print('PET - {0}'.format(choiceCopy))
+                    #print('PET - {0}'.format(choiceCopy))
                     legalChoices += 1
 
                     petName = choiceCopy.name
 
                     # Iterate over the existing squad to check if we can combine it
-                    print('SQUAD: {0}'.format(leaf.squad))
+                    #print('SQUAD: {0}'.format(leaf.squad))
                     for (index, member) in enumerate(leaf.squad):
 
                         # For every matching pet, combine it
@@ -214,7 +259,8 @@ while (len(leaves) > 0):
                             else:
                                 Node(name = squad, gold = gold, squad = squad, parent = leaf)
                         else:
-                            print('invalid pet name - was {0} expecting {1}'.format(member.name, petName))
+                            #print('invalid pet name - was {0} expecting {1}'.format(member.name, petName))
+                            pass
                     
                     # If the purchased pet was an Otter, we need to apply a buff to a friend if we have one
                     if ('Otter' in choiceCopy.name):
@@ -257,10 +303,18 @@ while (len(leaves) > 0):
         pass
 
     print('found {0} leaves'.format(len(leaves)))
-    #input()
+    input()
 
-print('{0} possible teams'.format(len(findall(baseNode, filter_=lambda node: len(node.children) == 0))))
+allSquadNodes = findall(baseNode, filter_=lambda node: len(node.children) == 0)
+allSquads = [node.squad for node in allSquadNodes]
+allSquadStrings = [str(squad) for squad in allSquads]
+allUniqueSquadStrings = list(set(allSquadStrings))
+allUniqueSquadStrings.sort()
 
+for squad in allUniqueSquadStrings:
+    print(squad)
+
+print('{0} possible teams'.format(len(allUniqueSquadStrings)))
 exit()
 
 
