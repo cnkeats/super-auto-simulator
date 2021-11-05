@@ -43,15 +43,15 @@ class Pet:
 choiceDict = {}
 
 possibleChoices = []
-#possibleChoices.append(Pet('Ant', 2, 1, 1, 3, False))
-#possibleChoices.append(Pet('Beaver', 2, 2, 1, 3, False))
-#possibleChoices.append(Pet('Cricket', 1, 2, 1, 3, False))
-#possibleChoices.append(Pet('Duck', 1, 2, 1, 3, False))
+possibleChoices.append(Pet('Ant', 2, 1, 1, 3, False))
+possibleChoices.append(Pet('Beaver', 2, 2, 1, 3, False))
+possibleChoices.append(Pet('Cricket', 1, 2, 1, 3, False))
+possibleChoices.append(Pet('Duck', 1, 2, 1, 3, False))
 possibleChoices.append(Pet('Fish', 2, 3, 1, 3, False))
-#possibleChoices.append(Pet('Horse', 1, 1, 1, 3, False))
-#possibleChoices.append(Pet('Mosquito', 2, 2, 1, 3, False))
+possibleChoices.append(Pet('Horse', 1, 1, 1, 3, False))
+possibleChoices.append(Pet('Mosquito', 2, 2, 1, 3, False))
 possibleChoices.append(Pet('Otter', 1, 2, 1, 3, False))
-#possibleChoices.append(Pet('Pig', 2, 2, 1, 3, False))
+possibleChoices.append(Pet('Pig', 2, 2, 1, 3, False))
 #possibleChoices.append('HONEY1')
 #possibleChoices.append('HONEY2')
 #possibleChoices.append('HONEY3')
@@ -82,7 +82,8 @@ while (len(leaves) > 0):
         
         legalChoices = 0
         for choice in possibleChoices:
-            if choice == 'DONE':
+            choiceCopy = copy.deepcopy(choice)
+            if choiceCopy == 'DONE':
                 print('DONE')
                 print(legalChoices)
                 if (legalChoices == 0):
@@ -91,7 +92,7 @@ while (len(leaves) > 0):
                     Node(name = '{0} - DONE'.format(leaf.squad), gold = leaf.gold, squad = leaf.squad, parent = leaf)
 
             else:
-                if (choice == 'HONEY1'):
+                if (choiceCopy == 'HONEY1'):
                     if (len(leaf.squad) < 1 or leaf.gold < 3):
                         continue
 
@@ -102,7 +103,7 @@ while (len(leaves) > 0):
 
                     Node(name = honeySquad, gold = leaf.gold - 3, squad = honeySquad, parent = leaf)
                     legalChoices += 1
-                elif(choice == 'HONEY2'):
+                elif(choiceCopy == 'HONEY2'):
                     if (len(leaf.squad) < 2 or leaf.gold < 3):
                         continue
 
@@ -113,7 +114,7 @@ while (len(leaves) > 0):
 
                     Node(name = honeySquad, gold = leaf.gold - 3, squad = honeySquad, parent = leaf)
                     legalChoices += 1
-                elif(choice == 'HONEY3'):
+                elif(choiceCopy == 'HONEY3'):
                     if (len(leaf.squad) < 3 or leaf.gold < 3):
                         continue
 
@@ -124,31 +125,31 @@ while (len(leaves) > 0):
 
                     Node(name = honeySquad, gold = leaf.gold - 3, squad = honeySquad, parent = leaf)
                     legalChoices += 1
-                elif(choice == 'APPLE1'):
+                elif(choiceCopy == 'APPLE1'):
                     continue
-                elif(choice == 'APPLE2'):
+                elif(choiceCopy == 'APPLE2'):
                     continue
-                elif(choice == 'APPLE3'):
+                elif(choiceCopy == 'APPLE3'):
                     continue
-                elif(choice == 'SELL 1'):
+                elif(choiceCopy == 'SELL 1'):
                     continue
-                elif(choice == 'SELL 2'):
+                elif(choiceCopy == 'SELL 2'):
                     continue
-                elif(choice == 'SELL 3'):
+                elif(choiceCopy == 'SELL 3'):
                     continue
-                #elif(choice == 'COMBINE'):
+                #elif(choiceCopy == 'COMBINE'):
                 else:
 
-                    gold = leaf.gold - choice.cost
+                    gold = leaf.gold - choiceCopy.cost
 
                     if (gold < 0):
                         continue
 
                     # We chose a pet
-                    print('PET - {0}'.format(choice))
+                    print('PET - {0}'.format(choiceCopy))
                     legalChoices += 1
 
-                    petName = choice.name
+                    petName = choiceCopy.name
 
                     # Iterate over the existing squad to check if we can combine it
                     print('SQUAD: {0}'.format(leaf.squad))
@@ -157,10 +158,10 @@ while (len(leaves) > 0):
                         # For every matching pet, combine it
                         if petName in member.name:
                             squad = copy.deepcopy(leaf.squad)
-                            squad[index].combineWith(choice, squad, True)
+                            squad[index].combineWith(choiceCopy, squad, True)
 
                             # If the purchased pet was an Otter, we need to apply a buff to a friend if we have one
-                            if ('Otter' in choice.name):
+                            if ('Otter' in choiceCopy.name):
 
                                 # Iterate over the of the squad
                                 for (buffIndex, buffie) in enumerate(squad):
@@ -180,13 +181,13 @@ while (len(leaves) > 0):
                                         postBuffSquad[index] = copy.deepcopy(squad[index])
 
                                         Node(name = postBuffSquad, gold = gold, squad = postBuffSquad, parent = leaf)
-
-                            #Node(name = squad, gold = gold, squad = squad, parent = leaf)
+                            else:
+                                Node(name = squad, gold = gold, squad = squad, parent = leaf)
                         else:
                             print('invalid pet name - was {0} expecting {1}'.format(member.name, petName))
                     
                     # If the purchased pet was an Otter, we need to apply a buff to a friend if we have one
-                    if ('Otter' in choice.name):
+                    if ('Otter' in choiceCopy.name):
                         squad = copy.deepcopy(leaf.squad)
                         # Iterate over the of the squad
                         for (buffIndex, buffie) in enumerate(squad):
@@ -194,20 +195,28 @@ while (len(leaves) > 0):
                             preBuffSquad = copy.deepcopy(squad)
                             
                             buffedUnit = copy.deepcopy(buffie)
-                            buffedUnit.power += choice.level
-                            buffedUnit.toughness += choice.level
+                            buffedUnit.power += choiceCopy.level
+                            buffedUnit.toughness += choiceCopy.level
+                            
+                            horsePower = sum([pet.level for pet in leaf.squad if 'Horse' in pet.name])
+                            choiceCopy.power += horsePower
 
-                            postBuffSquad = copy.deepcopy(preBuffSquad) + [choice]
+                            postBuffSquad = copy.deepcopy(preBuffSquad) + [choiceCopy]
                             postBuffSquad[buffIndex] = buffedUnit
 
+                            
                             Node(name = postBuffSquad, gold = gold, squad = postBuffSquad, parent = leaf)
                         if len(squad) == 0:
                             # Add the purchased pet to the end of the list
-                            squad = copy.deepcopy(leaf.squad) + [choice]
+                            squad = copy.deepcopy(leaf.squad) + [choiceCopy]
                             Node(name = squad, gold = gold, squad = squad, parent = leaf)
                     else:
                         # Add the purchased pet to the end of the list
-                        squad = copy.deepcopy(leaf.squad) + [choice]
+
+                        horsePower = sum([pet.level for pet in leaf.squad if 'Horse' in pet.name])
+                        choiceCopy.power += horsePower
+
+                        squad = copy.deepcopy(leaf.squad) + [choiceCopy]
                         Node(name = squad, gold = gold, squad = squad, parent = leaf)
 
     leaves = findall(baseNode, filter_=lambda node: len(node.children) == 0 and 'DONE' not in node.name)
@@ -218,9 +227,9 @@ while (len(leaves) > 0):
         pass
 
     print('found {0} leaves'.format(len(leaves)))
-    input()
+    #input()
 
-
+print('{0} possible teams'.format(len(findall(baseNode, filter_=lambda node: len(node.children) == 0))))
 
 exit()
 
