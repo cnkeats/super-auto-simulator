@@ -59,21 +59,21 @@ class Pet:
 choiceDict = {}
 
 possibleChoices = []
-#possibleChoices.append(Pet('Ant', 2, 1, 1, 3, False))
+possibleChoices.append(Pet('Ant', 2, 1, 1, 3, False))
 possibleChoices.append(Pet('Beaver', 2, 2, 1, 3, False))
-#possibleChoices.append(Pet('Cricket', 1, 2, 1, 3, False))
+possibleChoices.append(Pet('Cricket', 1, 2, 1, 3, False))
 possibleChoices.append(Pet('Duck', 1, 2, 1, 3, False))
 possibleChoices.append(Pet('Fish', 2, 3, 1, 3, False))
-#possibleChoices.append(Pet('Horse', 1, 1, 1, 3, False))
-#possibleChoices.append(Pet('Mosquito', 2, 2, 1, 3, False))
-#possibleChoices.append(Pet('Otter', 1, 2, 1, 3, False))
-#possibleChoices.append(Pet('Pig', 2, 2, 1, 3, False))
-#possibleChoices.append('HONEY 1')
-#possibleChoices.append('HONEY 2')
-#possibleChoices.append('HONEY 3')
-#possibleChoices.append('APPLE 1')
-#possibleChoices.append('APPLE 2')
-#possibleChoices.append('APPLE 3')
+possibleChoices.append(Pet('Horse', 1, 1, 1, 3, False))
+possibleChoices.append(Pet('Mosquito', 2, 2, 1, 3, False))
+possibleChoices.append(Pet('Otter', 1, 2, 1, 3, False))
+possibleChoices.append(Pet('Pig', 2, 2, 1, 3, False))
+possibleChoices.append('HONEY 1')
+possibleChoices.append('HONEY 2')
+possibleChoices.append('HONEY 3')
+possibleChoices.append('APPLE 1')
+possibleChoices.append('APPLE 2')
+possibleChoices.append('APPLE 3')
 possibleChoices.append('SELL 1')
 possibleChoices.append('SELL 2')
 possibleChoices.append('SELL 3')
@@ -205,6 +205,8 @@ while (len(leaves) > 0):
                             bonusChoices.append(buffedChoice)
                         Node(name = str(sellSquad) + ' (sold 1)', gold = leaf.gold + change, squad = sellSquad, bonusChoices = bonusChoices, parent = leaf)
                         continue
+                    elif ('Pig' in soldFriend.name):
+                        change += soldFriend.level
 
                     Node(name = str(sellSquad) + ' (sold 1)', gold = leaf.gold + change, squad = sellSquad, bonusChoices = leaf.bonusChoices, parent = leaf)
                     legalChoices += 1
@@ -232,6 +234,8 @@ while (len(leaves) > 0):
                             bonusChoices.append(buffedChoice)
                         Node(name = str(sellSquad) + ' (sold 2)', gold = leaf.gold + change, squad = sellSquad, bonusChoices = bonusChoices, parent = leaf)
                         continue
+                    elif ('Pig' in soldFriend.name):
+                        change += soldFriend.level
 
                     Node(name = str(sellSquad) + ' (sold 1)', gold = leaf.gold + change, squad = sellSquad, bonusChoices = leaf.bonusChoices, parent = leaf)
                     legalChoices += 1
@@ -259,6 +263,8 @@ while (len(leaves) > 0):
                             bonusChoices.append(buffedChoice)
                         Node(name = str(sellSquad) + ' (sold 3)', gold = leaf.gold + change, squad = sellSquad, bonusChoices = bonusChoices, parent = leaf)
                         continue
+                    elif ('Pig' in soldFriend.name):
+                        change += soldFriend.level
 
                     Node(name = str(sellSquad) + ' (sold 1)', gold = leaf.gold + change, squad = sellSquad, bonusChoices = leaf.bonusChoices, parent = leaf)
                     legalChoices += 1
@@ -349,11 +355,11 @@ while (len(leaves) > 0):
     
     print()
     for pre, fill, node in RenderTree(baseNode):
-        print('{0}{1} - {2}g'.format(pre, node.name, node.gold))
+        #print('{0}{1} - {2}g'.format(pre, node.name, node.gold))
         pass
 
     print('found {0} leaves'.format(len(leaves)))
-    input()
+    #input()
 
 allSquadNodes = findall(baseNode, filter_=lambda node: 'DONE' in node.name)
 allSquads = [node.squad for node in allSquadNodes]
