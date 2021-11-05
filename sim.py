@@ -2,6 +2,7 @@ import random
 import itertools
 import copy
 from anytree import Node, RenderTree, PreOrderIter, findall
+import traceback
 
 class Pet:
     name =''
@@ -25,6 +26,7 @@ class Pet:
 
     def __str__(self):
         return '{0} L{1} ({2} / {3}){4}'.format(self.name, self.level, self.power, self.toughness,' (honey)' if self.honey else '')
+    
     
     def __eq__(self, other):
         if not isinstance(other, Pet):
@@ -53,30 +55,42 @@ class Pet:
         elif (self.level == 2 and self.exp == 3):
             self.level += 1
 
+def encode(item):
+    if isinstance(item, Pet):
+        pet = item
+        return '{0} L{1}({2}) ({3} / {4}){5}'.format(pet.name, pet.level, pet.exp, pet.power, pet.toughness,' (honey)' if pet.honey else '')
+    elif isinstance(item, list):
+        output = '['
+        for pet in item:
+            output += encode(pet) + ','
+        output += ']'
+        return output
+    else:
+        return ''
 
 # ant beaver cricket duck fish horse mosquito otter pig
 
 choiceDict = {}
 
 possibleChoices = []
-possibleChoices.append(Pet('Ant', 2, 1, 1, 3, False))
+#possibleChoices.append(Pet('Ant', 2, 1, 1, 3, False))
 possibleChoices.append(Pet('Beaver', 2, 2, 1, 3, False))
-possibleChoices.append(Pet('Cricket', 1, 2, 1, 3, False))
-possibleChoices.append(Pet('Duck', 1, 2, 1, 3, False))
-possibleChoices.append(Pet('Fish', 2, 3, 1, 3, False))
-possibleChoices.append(Pet('Horse', 1, 1, 1, 3, False))
-possibleChoices.append(Pet('Mosquito', 2, 2, 1, 3, False))
-possibleChoices.append(Pet('Otter', 1, 2, 1, 3, False))
-possibleChoices.append(Pet('Pig', 2, 2, 1, 3, False))
-possibleChoices.append('HONEY 1')
-possibleChoices.append('HONEY 2')
-possibleChoices.append('HONEY 3')
+#possibleChoices.append(Pet('Cricket', 1, 2, 1, 3, False))
+#possibleChoices.append(Pet('Duck', 1, 2, 1, 3, False))
+#possibleChoices.append(Pet('Fish', 2, 3, 1, 3, False))
+#possibleChoices.append(Pet('Horse', 1, 1, 1, 3, False))
+#possibleChoices.append(Pet('Mosquito', 2, 2, 1, 3, False))
+#possibleChoices.append(Pet('Otter', 1, 2, 1, 3, False))
+#possibleChoices.append(Pet('Pig', 2, 2, 1, 3, False))
+#possibleChoices.append('HONEY 1')
+#possibleChoices.append('HONEY 2')
+#possibleChoices.append('HONEY 3')
 possibleChoices.append('APPLE 1')
-possibleChoices.append('APPLE 2')
-possibleChoices.append('APPLE 3')
-possibleChoices.append('SELL 1')
-possibleChoices.append('SELL 2')
-possibleChoices.append('SELL 3')
+#possibleChoices.append('APPLE 2')
+#possibleChoices.append('APPLE 3')
+#possibleChoices.append('SELL 1')
+#possibleChoices.append('SELL 2')
+#possibleChoices.append('SELL 3')
 possibleChoices.append('DONE')
 
 duckCount = 0
@@ -87,6 +101,9 @@ choice = None
 baseNode = Node(name='', gold=10, squad=[], bonusChoices=[])
 
 leaves = findall(baseNode, filter_=lambda node: len(node.children) == 0 and 'DONE' not in node.name)
+leafEncodings = [encode(node.squad) for node in leaves]
+for s in encode(leafEncodings):
+    print(s)
 
 while (len(leaves) > 0):
     for leaf in leaves:
@@ -118,7 +135,9 @@ while (len(leaves) > 0):
                     honeySquad = copy.deepcopy(leaf.squad)
                     honeySquad[0].honey = True
 
-                    Node(name = honeySquad, gold = leaf.gold - 3, squad = honeySquad, bonusChoices = leaf.bonusChoices, parent = leaf)
+                    if (encode(honeySquad) not in leafEncodings):
+                        Node(name = honeySquad, gold = leaf.gold - 3, squad = honeySquad, bonusChoices = leaf.bonusChoices, parent = leaf)
+                        leafEncodings.append(encode(honeySquad))
                     legalChoices += 1
                 elif(choiceCopy == 'HONEY 2'):
                     if (len(leaf.squad) < 2 or leaf.gold < 3):
@@ -129,7 +148,9 @@ while (len(leaves) > 0):
                     honeySquad = copy.deepcopy(leaf.squad)
                     honeySquad[1].honey = True
 
-                    Node(name = honeySquad, gold = leaf.gold - 3, squad = honeySquad, bonusChoices = leaf.bonusChoices, parent = leaf)
+                    if (encode(honeySquad) not in leafEncodings):
+                        Node(name = honeySquad, gold = leaf.gold - 3, squad = honeySquad, bonusChoices = leaf.bonusChoices, parent = leaf)
+                        leafEncodings.append(encode(honeySquad))
                     legalChoices += 1
                 elif(choiceCopy == 'HONEY 3'):
                     if (len(leaf.squad) < 3 or leaf.gold < 3):
@@ -140,7 +161,9 @@ while (len(leaves) > 0):
                     honeySquad = copy.deepcopy(leaf.squad)
                     honeySquad[2].honey = True
 
-                    Node(name = honeySquad, gold = leaf.gold - 3, squad = honeySquad, bonusChoices = leaf.bonusChoices, parent = leaf)
+                    if (encode(honeySquad) not in leafEncodings):
+                        Node(name = honeySquad, gold = leaf.gold - 3, squad = honeySquad, bonusChoices = leaf.bonusChoices, parent = leaf)
+                        leafEncodings.append(encode(honeySquad))
                     legalChoices += 1
                 elif(choiceCopy == 'APPLE 1'):
                     if (len(leaf.squad) < 1 or leaf.gold < 3):
@@ -335,13 +358,16 @@ while (len(leaves) > 0):
 
                             postBuffSquad = copy.deepcopy(preBuffSquad) + [choiceCopy]
                             postBuffSquad[buffIndex] = buffedUnit
-
                             
-                            Node(name = postBuffSquad, gold = gold, squad = postBuffSquad, bonusChoices = leaf.bonusChoices, parent = leaf)
+                            if (encode(postBuffSquad) not in leafEncodings):
+                                Node(name = postBuffSquad, gold = gold, squad = postBuffSquad, bonusChoices = leaf.bonusChoices, parent = leaf)
+                                leafEncodings.append(encode(postBuffSquad))
                         if len(squad) == 0:
                             # Add the purchased pet to the end of the list
                             squad = copy.deepcopy(leaf.squad) + [choiceCopy]
-                            Node(name = squad, gold = gold, squad = squad, bonusChoices = leaf.bonusChoices, parent = leaf)
+                            if (encode(squad) not in leafEncodings):
+                                Node(name = squad, gold = gold, squad = squad, bonusChoices = leaf.bonusChoices, parent = leaf)
+                                leafEncodings.append(encode(squad))
                     else:
                         # Add the purchased pet to the end of the list
 
@@ -349,13 +375,15 @@ while (len(leaves) > 0):
                         choiceCopy.power += horsePower
 
                         squad = copy.deepcopy(leaf.squad) + [choiceCopy]
-                        Node(name = squad, gold = gold, squad = squad, bonusChoices = leaf.bonusChoices, parent = leaf)
+                        if (encode(squad) not in leafEncodings):
+                            Node(name = squad, gold = gold, squad = squad, bonusChoices = leaf.bonusChoices, parent = leaf)
+                            leafEncodings.append(encode(squad))
 
     leaves = findall(baseNode, filter_=lambda node: len(node.children) == 0 and 'DONE' not in node.name)
     
     print()
     for pre, fill, node in RenderTree(baseNode):
-        #print('{0}{1} - {2}g'.format(pre, node.name, node.gold))
+        print('{0}{1} - {2}g'.format(pre, node.name, node.gold))
         pass
 
     print('found {0} leaves'.format(len(leaves)))
@@ -372,6 +400,10 @@ for squad in allUniqueSquadStrings:
     print(squad)
 
 print('{0} possible teams'.format(len(allUniqueSquadStrings)))
+
+for s in leafEncodings:
+    print(s)
+
 exit()
 
 
