@@ -52,12 +52,12 @@ possibleChoices.append(Pet('Horse', 1, 1, 1, 3, False))
 possibleChoices.append(Pet('Mosquito', 2, 2, 1, 3, False))
 possibleChoices.append(Pet('Otter', 1, 2, 1, 3, False))
 possibleChoices.append(Pet('Pig', 2, 2, 1, 3, False))
-#possibleChoices.append('HONEY1')
-#possibleChoices.append('HONEY2')
-#possibleChoices.append('HONEY3')
-#possibleChoices.append('APPLE1')
-#possibleChoices.append('APPLE2')
-#possibleChoices.append('APPLE3')
+possibleChoices.append('HONEY1')
+possibleChoices.append('HONEY2')
+possibleChoices.append('HONEY3')
+possibleChoices.append('APPLE1')
+possibleChoices.append('APPLE2')
+possibleChoices.append('APPLE3')
 #possibleChoices.append('SELL 1')
 #possibleChoices.append('SELL 2')
 #possibleChoices.append('SELL 3')
@@ -126,11 +126,41 @@ while (len(leaves) > 0):
                     Node(name = honeySquad, gold = leaf.gold - 3, squad = honeySquad, parent = leaf)
                     legalChoices += 1
                 elif(choiceCopy == 'APPLE1'):
-                    continue
+                    if (len(leaf.squad) < 1 or leaf.gold < 3):
+                        continue
+
+                    print('APPLE1')
+                    
+                    appleSquad = copy.deepcopy(leaf.squad)
+                    appleSquad[0].power += 1
+                    appleSquad[0].toughness += 1
+
+                    Node(name = appleSquad, gold = leaf.gold - 3, squad = appleSquad, parent = leaf)
+                    legalChoices += 1
                 elif(choiceCopy == 'APPLE2'):
-                    continue
+                    if (len(leaf.squad) < 2 or leaf.gold < 3):
+                        continue
+
+                    print('APPLE2')
+                    
+                    appleSquad = copy.deepcopy(leaf.squad)
+                    appleSquad[1].power += 1
+                    appleSquad[1].toughness += 1
+
+                    Node(name = appleSquad, gold = leaf.gold - 3, squad = appleSquad, parent = leaf)
+                    legalChoices += 1
                 elif(choiceCopy == 'APPLE3'):
-                    continue
+                    if (len(leaf.squad) < 3 or leaf.gold < 3):
+                        continue
+
+                    print('APPLE3')
+                    
+                    appleSquad = copy.deepcopy(leaf.squad)
+                    appleSquad[2].power += 1
+                    appleSquad[2].toughness += 1
+
+                    Node(name = appleSquad, gold = leaf.gold - 3, squad = appleSquad, parent = leaf)
+                    legalChoices += 1
                 elif(choiceCopy == 'SELL 1'):
                     continue
                 elif(choiceCopy == 'SELL 2'):
