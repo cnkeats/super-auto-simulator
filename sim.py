@@ -1,11 +1,14 @@
 import random
 import itertools
+import copy
+from anytree import Node, RenderTree, PreOrderIter, findall
 
 class Pet:
     name = ""
     power = 0
     toughness = 0
     level = 1
+    exp = 0
     cost = 3
     honey = False
 
@@ -22,82 +25,208 @@ class Pet:
 
     def __str__(self):
         return '{0} L{1} ({2} / {3}){4}'.format(self.name, self.level, self.power, self.toughness,' (honey)' if self.honey else '')
-
-def getPetFamily(name, power, toughness):
-    petFamily = []
-
-    # Basic Level 1
-    petFamily += [Pet(name, power, toughness, 1, 3, False)]
-
-    # Basic Level 1 x2
-    petFamily += [Pet(name, power+1, toughness+1, 1, 6, False)]
-
-    # Basic Level 2
-    petFamily += [Pet(name, power+2, toughness+2, 2, 9, False)]
-
-    # Basic Level 2 x2
-    petFamily += [Pet(name, power+3, toughness+3, 2, 12, False)]
-
-    # Basic Level 2 x3
-    petFamily += [Pet(name, power+4, toughness+4, 2, 15, False)]
     
-    # Basic Level 3
-    petFamily += [Pet(name, power+5, toughness+5, 2, 18, False)]
+    def combineWith(self, pet, team, bought=False):
+        self.power = max(self.power, pet.power) + 1
+        self.toughness = max(self.toughness, pet.toughness) + 1
+        self.exp += 1
+
+        if (self.level == 1 and self.exp == 2):
+            self.level += 1
+            self.exp = 0
+        elif (self.level == 2 and self.exp == 3):
+            self.level += 1
 
 
-    return petFamily
+# ant beaver cricket duck fish horse mosquito otter pig
 
-pets = {}
-#pets['ant'] = ['Ant', 2, 1, 1, 3, False]
-#pets['ant_H'] = ['Ant', 2, 1, 1, 6, True]
-#pets['beaver'] = ['Beaver', 2, 2, 1, 3, False]
-#pets['beaver_H'] = ['Beaver', 2, 2, 1, 6, True]
-#pets['cricket'] = ['Cricket', 1, 2, 1, 3, False]
-#pets['cricket_H'] = ['Cricket', 1, 2, 1, 6, True]
-#pets['duck'] = ['Duck', 1, 2, 1, 3, False]
-#pets['duck_H'] = ['Duck', 1, 2, 1, 6, True]
-#pets['fish'] = ['Fish', 2, 3, 1, 3, False]
-#pets['fish_H'] = ['Fish', 2, 3, 1, 6, True]
-#pets['horse'] = ['Horse', 1, 1, 1, 3, False]
-#pets['horse_H'] = ['Horse', 1, 1, 1, 6, True]
-#pets['mosquito'] = ['Mosquito', 2, 2, 1, 3, False]
-#pets['mosquito_H'] = ['Mosquito', 2, 2, 1, 6, True]
-#pets['otter'] = ['Otter', 1, 2, 1, 3, False]
-#pets['otter_H'] = ['Otter', 1, 2, 1, 6, True]
-#pets['pig'] = ['Pig', 2, 2, 1, 3, False]
-#pets['pig_H'] = ['Pig', 2, 2, 1, 6, True]
+choiceDict = {}
 
-pets['ant1'] = ['Ant', 2, 1, 1, 3, False]
-pets['ant+'] = ['Ant', 3, 2, 1, 6, False]
-pets['ant2'] = ['Ant', 4, 3, 2, 9, False]
-pets['ant1_H'] = ['Ant', 2, 1, 1, 6, True]
-pets['ant+_H'] = ['Ant', 3, 2, 1, 9, True]
-pets['ant2_H'] = ['Ant', 4, 3, 2, 12, True]
+possibleChoices = []
+#possibleChoices.append(Pet('Ant', 2, 1, 1, 3, False))
+#possibleChoices.append(Pet('Beaver', 2, 2, 1, 3, False))
+#possibleChoices.append(Pet('Cricket', 1, 2, 1, 3, False))
+#possibleChoices.append(Pet('Duck', 1, 2, 1, 3, False))
+possibleChoices.append(Pet('Fish', 2, 3, 1, 3, False))
+#possibleChoices.append(Pet('Horse', 1, 1, 1, 3, False))
+#possibleChoices.append(Pet('Mosquito', 2, 2, 1, 3, False))
+possibleChoices.append(Pet('Otter', 1, 2, 1, 3, False))
+#possibleChoices.append(Pet('Pig', 2, 2, 1, 3, False))
+#possibleChoices.append('HONEY1')
+#possibleChoices.append('HONEY2')
+#possibleChoices.append('HONEY3')
+#possibleChoices.append('APPLE1')
+#possibleChoices.append('APPLE2')
+#possibleChoices.append('APPLE3')
+#possibleChoices.append('SELL 1')
+#possibleChoices.append('SELL 2')
+#possibleChoices.append('SELL 3')
+possibleChoices.append('DONE')
 
-print(getPetFamily('Ant', 2, 1))
+choice = None
 
-wld = [0, 0, 0]
 
-petList = list(pets.keys())
-petList.sort()
+baseNode = Node(name='', gold=10, squad=[])
+
+leaves = findall(baseNode, filter_=lambda node: len(node.children) == 0 and 'DONE' not in node.name)
+
+while (len(leaves) > 0):
+    for leaf in leaves:
+
+        print()
+        print('iterating choices for the following leaf:')
+        for pre, fill, node in RenderTree(leaf):
+            print('{0}{1} - {2}g'.format(pre, node.name, node.gold))
+            pass
+        print()
+        
+        legalChoices = 0
+        for choice in possibleChoices:
+            if choice == 'DONE':
+                print('DONE')
+                print(legalChoices)
+                if (legalChoices == 0):
+                    leaf.name = '{0} - DONE'.format(leaf.name)
+                else:
+                    Node(name = '{0} - DONE'.format(leaf.squad), gold = leaf.gold, squad = leaf.squad, parent = leaf)
+
+            else:
+                if (choice == 'HONEY1'):
+                    if (len(leaf.squad) < 1 or leaf.gold < 3):
+                        continue
+
+                    print('HONEY1')
+                    
+                    honeySquad = copy.deepcopy(leaf.squad)
+                    honeySquad[0].honey = True
+
+                    Node(name = honeySquad, gold = leaf.gold - 3, squad = honeySquad, parent = leaf)
+                    legalChoices += 1
+                elif(choice == 'HONEY2'):
+                    if (len(leaf.squad) < 2 or leaf.gold < 3):
+                        continue
+
+                    print('HONEY2')
+                    
+                    honeySquad = copy.deepcopy(leaf.squad)
+                    honeySquad[1].honey = True
+
+                    Node(name = honeySquad, gold = leaf.gold - 3, squad = honeySquad, parent = leaf)
+                    legalChoices += 1
+                elif(choice == 'HONEY3'):
+                    if (len(leaf.squad) < 3 or leaf.gold < 3):
+                        continue
+
+                    print('HONEY3')
+                    
+                    honeySquad = copy.deepcopy(leaf.squad)
+                    honeySquad[2].honey = True
+
+                    Node(name = honeySquad, gold = leaf.gold - 3, squad = honeySquad, parent = leaf)
+                    legalChoices += 1
+                elif(choice == 'APPLE1'):
+                    continue
+                elif(choice == 'APPLE2'):
+                    continue
+                elif(choice == 'APPLE3'):
+                    continue
+                elif(choice == 'SELL 1'):
+                    continue
+                elif(choice == 'SELL 2'):
+                    continue
+                elif(choice == 'SELL 3'):
+                    continue
+                #elif(choice == 'COMBINE'):
+                else:
+
+                    gold = leaf.gold - choice.cost
+
+                    if (gold < 0):
+                        continue
+
+                    # We chose a pet
+                    print('PET - {0}'.format(choice))
+                    legalChoices += 1
+
+                    petName = choice.name
+
+                    # Iterate over the existing squad to check if we can combine it
+                    print('SQUAD: {0}'.format(leaf.squad))
+                    for (index, member) in enumerate(leaf.squad):
+
+                        # For every matching pet, combine it
+                        if petName in member.name:
+                            squad = copy.deepcopy(leaf.squad)
+                            squad[index].combineWith(choice, squad, True)
+
+                            # If the purchased pet was an Otter, we need to apply a buff to a friend if we have one
+                            if ('Otter' in choice.name):
+
+                                # Iterate over the of the squad
+                                for (buffIndex, buffie) in enumerate(squad):
+
+                                    # Only progress if we aren't ourselves
+                                    if (buffIndex != index):
+
+                                        # Prebuff squad is a copy of the existing, modified squad
+                                        preBuffSquad = copy.deepcopy(squad)
+                                        
+                                        buffedUnit = copy.deepcopy(buffie)
+                                        buffedUnit.power += squad[index].level
+                                        buffedUnit.toughness += squad[index].level
+
+                                        postBuffSquad = copy.deepcopy(preBuffSquad)
+                                        postBuffSquad[buffIndex] = buffedUnit
+                                        postBuffSquad[index] = copy.deepcopy(squad[index])
+
+                                        Node(name = postBuffSquad, gold = gold, squad = postBuffSquad, parent = leaf)
+
+                            #Node(name = squad, gold = gold, squad = squad, parent = leaf)
+                        else:
+                            print('invalid pet name - was {0} expecting {1}'.format(member.name, petName))
+                    
+                    # If the purchased pet was an Otter, we need to apply a buff to a friend if we have one
+                    if ('Otter' in choice.name):
+                        squad = copy.deepcopy(leaf.squad)
+                        # Iterate over the of the squad
+                        for (buffIndex, buffie) in enumerate(squad):
+                            # Prebuff squad is a copy of the existing squad
+                            preBuffSquad = copy.deepcopy(squad)
+                            
+                            buffedUnit = copy.deepcopy(buffie)
+                            buffedUnit.power += choice.level
+                            buffedUnit.toughness += choice.level
+
+                            postBuffSquad = copy.deepcopy(preBuffSquad) + [choice]
+                            postBuffSquad[buffIndex] = buffedUnit
+
+                            Node(name = postBuffSquad, gold = gold, squad = postBuffSquad, parent = leaf)
+                        if len(squad) == 0:
+                            # Add the purchased pet to the end of the list
+                            squad = copy.deepcopy(leaf.squad) + [choice]
+                            Node(name = squad, gold = gold, squad = squad, parent = leaf)
+                    else:
+                        # Add the purchased pet to the end of the list
+                        squad = copy.deepcopy(leaf.squad) + [choice]
+                        Node(name = squad, gold = gold, squad = squad, parent = leaf)
+
+    leaves = findall(baseNode, filter_=lambda node: len(node.children) == 0 and 'DONE' not in node.name)
+    
+    print()
+    for pre, fill, node in RenderTree(baseNode):
+        print('{0}{1} - {2}g'.format(pre, node.name, node.gold))
+        pass
+
+    print('found {0} leaves'.format(len(leaves)))
+    input()
+
+
+
 exit()
 
-def pet(petname):
-    name = pets[petname][0]
-    power = pets[petname][1]
-    toughness = pets[petname][2]
-    level = pets[petname][3]
-    cost = pets[petname][4]
-    honey = pets[petname][5]
-
-    return Pet(name, power, toughness, level, cost, honey)
 
 #print (list(itertools.permutations(petList, 3)))
-all3MemberSquads = list(itertools.product(petList, petList, petList))
-all2MemberSquads = list(itertools.product(petList, petList))
-all1MemberSquads = list(itertools.product(petList))
-
-allSquads = all1MemberSquads + all2MemberSquads + all3MemberSquads
+allSquads = []
 
 allLegitimateSquads = []
 
