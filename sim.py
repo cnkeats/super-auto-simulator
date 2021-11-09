@@ -2,6 +2,7 @@ import random
 import itertools
 import copy
 from anytree import Node, RenderTree, PreOrderIter, findall
+from anytree.exporter import DotExporter
 import traceback
 
 class Pet:
@@ -26,7 +27,6 @@ class Pet:
 
     def __str__(self):
         return '{0} L{1} ({2} / {3}){4}'.format(self.name, self.level, self.power, self.toughness,' (honey)' if self.honey else '')
-    
     
     def __eq__(self, other):
         if not isinstance(other, Pet):
@@ -71,6 +71,10 @@ def encode(item):
 def createNode(name, gold, squad, bonusChoices, parent):
     
     def isDuplicate(node):
+        if 'DONE' in node.name and 'DONE' not in name:
+            return False
+        if 'DONE' in name and 'DONE' not in node.name:
+            return False
         if node.gold != gold:
             #print('    gold mismatch!')
             #print('{0} compared to {1}'.format(squad, node.squad))
@@ -96,41 +100,33 @@ def createNode(name, gold, squad, bonusChoices, parent):
         #print('{0} compared to {1}'.format(squad, node.squad))
         return True
 
-    print('===========================================================================================================================\n\n')
-    print('Current tree:\n')
-    for pre, fill, node in RenderTree(baseNode):
-        print('{0}{1} - {2}g'.format(pre, node.name, node.gold))
-    print('---------------------------------------------------------------------------------------------------------------------------\n\n')
-    # Check to see if a node with this exact configuration exists
-    print('\nChecking for duplicates of {0}'.format(name))
-    #input()
-
     # for some reason, using 'stop' makes the filter not work
     #leaves = findall(baseNode, filter_=lambda node: isDuplicate(node), stop=lambda nodex: isDuplicate(nodex))
     leaves = findall(baseNode, filter_=lambda node: isDuplicate(node))
     
     if len(leaves) > 0 and leaves[0] != baseNode:
-        print('FOUND DUPLICATE - not adding new node!')
+        #print('FOUND DUPLICATE - not adding new node!')
         #print(leaves[0])
         #input()
+        pass
     else:
         Node(name = name, gold = gold, squad = squad, bonusChoices = bonusChoices, parent = parent)
-        print('No duplicate - created new node!')
+        #print('No duplicate - created new node!')
 
 # ant beaver cricket duck fish horse mosquito otter pig
 
 choiceDict = {}
 
 possibleChoices = []
-#possibleChoices.append(Pet('Ant', 2, 1, 1, 3, False))
-#possibleChoices.append(Pet('Beaver', 2, 2, 1, 3, False))
-#possibleChoices.append(Pet('Cricket', 1, 2, 1, 3, False))
-#possibleChoices.append(Pet('Duck', 1, 2, 1, 3, False))
+possibleChoices.append(Pet('Ant', 2, 1, 1, 3, False))
+possibleChoices.append(Pet('Beaver', 2, 2, 1, 3, False))
+possibleChoices.append(Pet('Cricket', 1, 2, 1, 3, False))
+possibleChoices.append(Pet('Duck', 1, 2, 1, 3, False))
 possibleChoices.append(Pet('Fish', 2, 3, 1, 3, False))
-#possibleChoices.append(Pet('Horse', 1, 1, 1, 3, False))
-#possibleChoices.append(Pet('Mosquito', 2, 2, 1, 3, False))
-#possibleChoices.append(Pet('Otter', 1, 2, 1, 3, False))
-#possibleChoices.append(Pet('Pig', 2, 2, 1, 3, False))
+possibleChoices.append(Pet('Horse', 1, 1, 1, 3, False))
+possibleChoices.append(Pet('Mosquito', 2, 2, 1, 3, False))
+possibleChoices.append(Pet('Otter', 1, 2, 1, 3, False))
+possibleChoices.append(Pet('Pig', 2, 2, 1, 3, False))
 possibleChoices.append('HONEY 1')
 possibleChoices.append('HONEY 2')
 possibleChoices.append('HONEY 3')
@@ -147,8 +143,8 @@ duckCount = 0
 choice = None
 
 
-#baseNode = Node(name='', gold=10, squad=[], bonusChoices=[])
-baseNode = Node(name=str(copy.deepcopy(possibleChoices[0])), gold=7, squad=[copy.deepcopy(possibleChoices[0])], bonusChoices=[])
+baseNode = Node(name='', gold=10, squad=[], bonusChoices=[])
+#baseNode = Node(name=str(copy.deepcopy(possibleChoices[0])), gold=7, squad=[copy.deepcopy(possibleChoices[0])], bonusChoices=[])
 
 leaves = findall(baseNode, filter_=lambda node: len(node.children) == 0 and 'DONE' not in node.name)
 
@@ -416,16 +412,47 @@ while (len(leaves) > 0):
 
     leaves = findall(baseNode, filter_=lambda node: len(node.children) == 0 and 'DONE' not in node.name)
     
-    print()
     for pre, fill, node in RenderTree(baseNode):
-        print('{0}{1} - {2}g'.format(pre, node.name, node.gold))
+        #print('{0}{1} - {2}g'.format(pre, node.name, node.gold))
         pass
 
-    #print('found {0} leaves'.format(len(leaves)))
+    print('found {0} leaves'.format(len(leaves)))
     #input()
 
-allSquadNodes = findall(baseNode, filter_=lambda node: 'DONE' in node.name)
+allSquadNodes = findall(baseNode, filter_=lambda node: 'DONE' in node.name and len(node.bonusChoices)==0)
+
+#strings = ['{0} - {1}g - {2}'.format(str(node.squad), str(node.gold), str(len(node.bonusChoices))) for node in allSquadNodes]
+strings = ['{0}'.format(str(node.squad)) for node in allSquadNodes]
+strings.sort()
+for string in strings:
+    print(string)
+
+#file = open('tree.txt', 'w', encoding='utf-8')
+#for pre, fill, node in RenderTree(baseNode):
+#    #print('{0}{1} - {2}g'.format(pre, node.name, node.gold))
+#    file.write('{0}{1} - {2}g\n'.format(pre, node.name, node.gold))
+#    pass
+
+#file.close()
+
+
 print('\n{0} final nodes'.format(len(allSquadNodes)))
+
+unique = list(set(strings))
+unique.sort()
+print('\n{0} unique squads'.format(len(unique)))
+
+#file = open('squads.txt', 'w', encoding='utf-8')
+#for squad in unique:
+#    #print('{0}{1} - {2}g'.format(pre, node.name, node.gold))
+#    file.write('{0}\n'.format(squad))
+#    pass
+
+#file.close()
+
+#print(temp)
+#print(len(temp))
+
 exit()
 
 
