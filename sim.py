@@ -136,6 +136,7 @@ possibleChoices.append('APPLE 3')
 #possibleChoices.append('SELL 1')
 #possibleChoices.append('SELL 2')
 #possibleChoices.append('SELL 3')
+possibleChoices.append('REROLL')
 possibleChoices.append('DONE')
 
 duckCount = 0
@@ -143,7 +144,7 @@ duckCount = 0
 choice = None
 
 
-baseNode = Node(name='', gold=10, squad=[], bonusChoices=[])
+baseNode = Node(name='', gold=10, squad=[], bonusChoices=[], petsBought=0, foodBought=0)
 #baseNode = Node(name=str(copy.deepcopy(possibleChoices[0])), gold=7, squad=[copy.deepcopy(possibleChoices[0])], bonusChoices=[])
 
 leaves = findall(baseNode, filter_=lambda node: len(node.children) == 0 and 'DONE' not in node.name)
