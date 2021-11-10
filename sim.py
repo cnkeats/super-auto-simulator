@@ -68,7 +68,7 @@ def encode(item):
     else:
         return ''
 
-def createNode(name, gold, squad, bonusChoices, parent):
+def createNode(name, gold, squad, bonusChoices, petsBought, foodBought, parent):
     
     def isDuplicate(node):
         if 'DONE' in node.name and 'DONE' not in name:
@@ -78,6 +78,10 @@ def createNode(name, gold, squad, bonusChoices, parent):
         if node.gold != gold:
             #print('    gold mismatch!')
             #print('{0} compared to {1}'.format(squad, node.squad))
+            return False
+        if node.petsBought != petsBought:
+            return False
+        if node.foodBought != foodBought:
             return False
         if len(squad) != len(node.squad):
             #print('    different count!')
@@ -110,7 +114,7 @@ def createNode(name, gold, squad, bonusChoices, parent):
         #input()
         pass
     else:
-        Node(name = name, gold = gold, squad = squad, bonusChoices = bonusChoices, parent = parent)
+        Node(name = name, gold = gold, squad = squad, bonusChoices = bonusChoices, petsBought = petsBought, foodBought = foodBought, parent = parent)
         #print('No duplicate - created new node!')
 
 # ant beaver cricket duck fish horse mosquito otter pig
@@ -133,9 +137,9 @@ possibleChoices.append('HONEY 3')
 possibleChoices.append('APPLE 1')
 possibleChoices.append('APPLE 2')
 possibleChoices.append('APPLE 3')
-#possibleChoices.append('SELL 1')
-#possibleChoices.append('SELL 2')
-#possibleChoices.append('SELL 3')
+possibleChoices.append('SELL 1')
+possibleChoices.append('SELL 2')
+possibleChoices.append('SELL 3')
 possibleChoices.append('REROLL')
 possibleChoices.append('DONE')
 
@@ -167,11 +171,11 @@ while (len(leaves) > 0):
                 if (legalChoices == 0):
                     leaf.name = '{0} - DONE'.format(leaf.name)
                 else:
-                    createNode('{0} - DONE'.format(leaf.squad), leaf.gold, leaf.squad, leaf.bonusChoices, leaf)
+                    createNode('{0} - DONE'.format(leaf.squad), leaf.gold, leaf.squad, leaf.bonusChoices, leaf.petsBought, leaf.foodBought, leaf)
 
             else:
                 if (choiceCopy == 'HONEY 1'):
-                    if (len(leaf.squad) < 1 or leaf.gold < 3):
+                    if (len(leaf.squad) < 1 or leaf.gold < 3 or leaf.foodBought == 1):
                         continue
 
                     #print('HONEY 1')
@@ -179,10 +183,10 @@ while (len(leaves) > 0):
                     honeySquad = copy.deepcopy(leaf.squad)
                     honeySquad[0].honey = True
 
-                    createNode(honeySquad, leaf.gold - 3, honeySquad, leaf.bonusChoices, leaf)
+                    createNode(honeySquad, leaf.gold - 3, honeySquad, leaf.bonusChoices, leaf.petsBought, leaf.foodBought + 1, leaf)
                     legalChoices += 1
                 elif(choiceCopy == 'HONEY 2'):
-                    if (len(leaf.squad) < 2 or leaf.gold < 3):
+                    if (len(leaf.squad) < 2 or leaf.gold < 3 or leaf.foodBought == 1):
                         continue
 
                     #print('HONEY 2')
@@ -190,10 +194,10 @@ while (len(leaves) > 0):
                     honeySquad = copy.deepcopy(leaf.squad)
                     honeySquad[1].honey = True
 
-                    createNode(honeySquad, leaf.gold - 3, honeySquad, leaf.bonusChoices, leaf)
+                    createNode(honeySquad, leaf.gold - 3, honeySquad, leaf.bonusChoices, leaf.petsBought, leaf.foodBought + 1, leaf)
                     legalChoices += 1
                 elif(choiceCopy == 'HONEY 3'):
-                    if (len(leaf.squad) < 3 or leaf.gold < 3):
+                    if (len(leaf.squad) < 3 or leaf.gold < 3 or leaf.foodBought == 1):
                         continue
 
                     #print('HONEY 3')
@@ -201,10 +205,10 @@ while (len(leaves) > 0):
                     honeySquad = copy.deepcopy(leaf.squad)
                     honeySquad[2].honey = True
 
-                    createNode(honeySquad, leaf.gold - 3, honeySquad, leaf.bonusChoices, leaf)
+                    createNode(honeySquad, leaf.gold - 3, honeySquad, leaf.bonusChoices, leaf.petsBought, leaf.foodBought + 1, leaf)
                     legalChoices += 1
                 elif(choiceCopy == 'APPLE 1'):
-                    if (len(leaf.squad) < 1 or leaf.gold < 3):
+                    if (len(leaf.squad) < 1 or leaf.gold < 3 or leaf.foodBought == 1):
                         continue
 
                     #print('APPLE 1')
@@ -214,10 +218,10 @@ while (len(leaves) > 0):
                     appleSquad[0].toughness += 1
                     #appleSquad[0].name += ' (apple)'
 
-                    createNode(appleSquad, leaf.gold - 3, appleSquad, leaf.bonusChoices, leaf)
+                    createNode(appleSquad, leaf.gold - 3, appleSquad, leaf.bonusChoices, leaf.petsBought, leaf.foodBought + 1, leaf)
                     legalChoices += 1
                 elif(choiceCopy == 'APPLE 2'):
-                    if (len(leaf.squad) < 2 or leaf.gold < 3):
+                    if (len(leaf.squad) < 2 or leaf.gold < 3 or leaf.foodBought == 1):
                         continue
 
                     #print('APPLE 2')
@@ -227,10 +231,10 @@ while (len(leaves) > 0):
                     appleSquad[1].toughness += 1
                     #appleSquad[1].name += ' (apple)'
 
-                    createNode(appleSquad, leaf.gold - 3, appleSquad, leaf.bonusChoices, leaf)
+                    createNode(appleSquad, leaf.gold - 3, appleSquad, leaf.bonusChoices, leaf.petsBought, leaf.foodBought + 1, leaf)
                     legalChoices += 1
                 elif(choiceCopy == 'APPLE 3'):
-                    if (len(leaf.squad) < 3 or leaf.gold < 3):
+                    if (len(leaf.squad) < 3 or leaf.gold < 3 or leaf.foodBought == 1):
                         continue
 
                     #print('APPLE 3')
@@ -240,7 +244,7 @@ while (len(leaves) > 0):
                     appleSquad[2].toughness += 1
                     #appleSquad[2].name += ' (apple)'
 
-                    createNode(appleSquad, leaf.gold - 3, appleSquad, leaf.bonusChoices, leaf)
+                    createNode(appleSquad, leaf.gold - 3, appleSquad, leaf.bonusChoices, leaf.petsBought, leaf.foodBought + 1, leaf)
                     legalChoices += 1
                 elif(choiceCopy == 'SELL 1'):
                     if (len(leaf.squad) < 1):
@@ -264,12 +268,12 @@ while (len(leaves) > 0):
                             buffedChoice.power += soldFriend.level
                             buffedChoice.toughness += soldFriend.level
                             bonusChoices.append(buffedChoice)
-                        createNode(str(sellSquad) + ' (sold 1)', leaf.gold + change, sellSquad, bonusChoices, leaf)
+                        createNode(str(sellSquad) + ' (sold 1)', leaf.gold + change, sellSquad, bonusChoices, leaf.petsBought, leaf.foodBought, leaf)
                         continue
                     elif ('Pig' in soldFriend.name):
                         change += soldFriend.level
 
-                    createNode(str(sellSquad) + ' (sold 1)', leaf.gold + change, sellSquad, leaf.bonusChoices, leaf)
+                    createNode(str(sellSquad) + ' (sold 1)', leaf.gold + change, sellSquad, leaf.bonusChoices, leaf.petsBought, leaf.foodBought, leaf)
                     legalChoices += 1
                 elif(choiceCopy == 'SELL 2'):
                     if (len(leaf.squad) < 2):
@@ -293,12 +297,12 @@ while (len(leaves) > 0):
                             buffedChoice.power += soldFriend.level
                             buffedChoice.toughness += soldFriend.level
                             bonusChoices.append(buffedChoice)
-                        createNode(str(sellSquad) + ' (sold 2)', leaf.gold + change, sellSquad, bonusChoices, leaf)
+                        createNode(str(sellSquad) + ' (sold 2)', leaf.gold + change, sellSquad, bonusChoices, leaf.petsBought, leaf.foodBought, leaf)
                         continue
                     elif ('Pig' in soldFriend.name):
                         change += soldFriend.level
 
-                    createNode(str(sellSquad) + ' (sold 1)', leaf.gold + change, sellSquad, leaf.bonusChoices, leaf)
+                    createNode(str(sellSquad) + ' (sold 1)', leaf.gold + change, sellSquad, leaf.bonusChoices, leaf.petsBought, leaf.foodBought, leaf)
                     legalChoices += 1
                 elif(choiceCopy == 'SELL 3'):
                     if (len(leaf.squad) < 3):
@@ -322,19 +326,33 @@ while (len(leaves) > 0):
                             buffedChoice.power += soldFriend.level
                             buffedChoice.toughness += soldFriend.level
                             bonusChoices.append(buffedChoice)
-                        createNode(str(sellSquad) + ' (sold 3)', leaf.gold + change, sellSquad, bonusChoices, leaf)
+                        createNode(str(sellSquad) + ' (sold 3)', leaf.gold + change, sellSquad, bonusChoices, leaf.petsBought, leaf.foodBought, leaf)
                         continue
                     elif ('Pig' in soldFriend.name):
                         change += soldFriend.level
 
-                    createNode(str(sellSquad) + ' (sold 1)', leaf.gold + change, sellSquad, leaf.bonusChoices, leaf)
+                    createNode(str(sellSquad) + ' (sold 1)', leaf.gold + change, sellSquad, leaf.bonusChoices, leaf.petsBought, leaf.foodBought, leaf)
                     legalChoices += 1
                 #elif(choiceCopy == 'COMBINE'):
+                elif(choiceCopy == 'REROLL'):
+                    if (leaf.gold < 1):
+                        continue
+
+                    # If our gold + animal levels is less than 4 before rolling it is impossible to buy anything, so we can prune those branches
+                    if (leaf.gold + sum([pet.level for pet in leaf.squad]) < 4):
+                        continue
+
+                    # If we haven't hit max pets bought or food bought, we can assume that we have perfect luck instead of continuing this branch, preventing reroll spam
+                    if (leaf.petsBought != 3 and leaf.foodBought != 1):
+                        continue
+
+                    createNode(str(leaf.squad) + ' (reroll)', leaf.gold - 1, leaf.squad, [], 0, 0, leaf)
+                    pass
                 else:
 
                     gold = leaf.gold - choiceCopy.cost
 
-                    if (gold < 0):
+                    if (gold < 0 or leaf.petsBought == 3):
                         continue
 
                     # We chose a pet
@@ -372,9 +390,9 @@ while (len(leaves) > 0):
                                         postBuffSquad[buffIndex] = buffedUnit
                                         postBuffSquad[index] = copy.deepcopy(squad[index])
 
-                                        createNode(postBuffSquad, gold, postBuffSquad, leaf.bonusChoices, leaf)
+                                        createNode(postBuffSquad, gold, postBuffSquad, leaf.bonusChoices, leaf.petsBought + 1, leaf.foodBought, leaf)
                             else:
-                                createNode(squad, gold, squad, leaf.bonusChoices, leaf)
+                                createNode(squad, gold, squad, leaf.bonusChoices, leaf.petsBought + 1, leaf.foodBought, leaf)
                                 pass
                         else:
                             #print('invalid pet name - was {0} expecting {1}'.format(member.name, petName))
@@ -398,18 +416,18 @@ while (len(leaves) > 0):
                             postBuffSquad = copy.deepcopy(preBuffSquad) + [choiceCopy]
                             postBuffSquad[buffIndex] = buffedUnit
                             
-                            createNode(postBuffSquad, gold, postBuffSquad, leaf.bonusChoices, leaf)
+                            createNode(postBuffSquad, gold, postBuffSquad, leaf.bonusChoices, leaf.petsBought + 1, leaf.foodBought, leaf)
                         if len(squad) == 0:
                             # Add the purchased pet to the end of the list
                             squad = copy.deepcopy(leaf.squad) + [choiceCopy]
-                            createNode(squad, gold, squad, leaf.bonusChoices, leaf)
+                            createNode(squad, gold, squad, leaf.bonusChoices, leaf.petsBought + 1, leaf.foodBought, leaf)
                     else:
                         # Add the purchased pet to the end of the list
                         horsePower = sum([pet.level for pet in leaf.squad if 'Horse' in pet.name])
                         choiceCopy.power += horsePower
 
                         squad = copy.deepcopy(leaf.squad) + [choiceCopy]
-                        createNode(squad, gold, squad, leaf.bonusChoices, leaf)
+                        createNode(squad, gold, squad, leaf.bonusChoices, leaf.petsBought + 1, leaf.foodBought, leaf)
 
     leaves = findall(baseNode, filter_=lambda node: len(node.children) == 0 and 'DONE' not in node.name)
     
@@ -425,8 +443,8 @@ allSquadNodes = findall(baseNode, filter_=lambda node: 'DONE' in node.name and l
 #strings = ['{0} - {1}g - {2}'.format(str(node.squad), str(node.gold), str(len(node.bonusChoices))) for node in allSquadNodes]
 strings = ['{0}'.format(str(node.squad)) for node in allSquadNodes]
 strings.sort()
-for string in strings:
-    print(string)
+#for string in strings:
+#    print(string)
 
 #file = open('tree.txt', 'w', encoding='utf-8')
 #for pre, fill, node in RenderTree(baseNode):
@@ -455,169 +473,3 @@ print('\n{0} unique squads'.format(len(unique)))
 #print(len(temp))
 
 exit()
-
-
-#print (list(itertools.permutations(petList, 3)))
-allSquads = []
-
-allLegitimateSquads = []
-
-for squad in allSquads:
-
-    costs = [pet(squadMember).cost for squadMember in squad]
-    cost = sum(costs)
-
-    #if (p1.cost + p2.cost + p3.cost < 10):
-    if (cost < 10):
-        allLegitimateSquads.append(squad)
-        print('accepting {0}'.format(squad))
-    else:
-        print('rejecting {0}'.format(squad))
-    
-    temp = [pet(squadMember)for squadMember in squad  if 'Horse' in pet(squadMember).name ]
-    
-    if len(temp) > 0:
-        print(temp)
-        input()
-    
-
-print('{0} unique squads'.format(len(all3MemberSquads)))
-print('{0} unique legal squads'.format(len(allLegitimateSquads)))
-
-allMatchups = list(itertools.product(all3MemberSquads, all3MemberSquads))
-print('{0} unique matchups'.format(len(allMatchups)))
-allLegalMatchups = list(itertools.product(allLegitimateSquads, allLegitimateSquads))
-print('{0} unique legal matchups'.format(len(allLegalMatchups)))
-
-#debug = True
-debug = False
-
-results = {}
-
-exit()
-#for x in range(0, 50000):
-for matchup in allMatchups:
-    squad1 = matchup[0]
-    squad2 = matchup[1]
-
-    originalTeam1 = [pet(member) for member in squad1]
-    originalTeam2 = [pet(member) for member in squad2]
-    team1 = [pet(member) for member in squad1]
-    team2 = [pet(member) for member in squad2]
-
-    def start(pet, team):
-        if (team == team1):
-            opponent = team2
-        else:
-            opponent = team1
-        
-        if ('Mosquito' in pet.name):
-            hitPet = random.choice(opponent)
-            if (debug):
-                print('{0} was hit by a mosquito'.format(hitPet))
-            hitPet.toughness -= pet.level
-            if (debug):
-                print('{0}'.format(hitPet))
-                print()
-            if (hitPet.toughness <= 0):
-                death(hitPet, opponent)
-
-    def death(pet, team):
-        if (debug):
-            print('{0} died :('.format(pet))
-            print()
-        team.remove(pet)
-
-        L1Horses = [pet for pet in team if pet.name == 'Horse' and pet.level == 1]
-        L2Horses = [pet for pet in team if pet.name == 'Horse' and pet.level == 2]
-        boost = len(L1Horses) + 2 * len(L2Horses)
-
-        if ('Cricket' in pet.name):
-            team.insert(0, Pet('Subcricket', 1 + boost, 1, 1, 0, False))
-        elif ('Ant' in pet.name):
-            if (len(team) > 0):
-                buffPet = random.choice(team)
-                buffPet.power += 2
-                buffPet.toughness += 1
-        
-        if (pet.honey):
-            team.insert(0, Pet('Bee', 1 + boost, 1, 1, 0, False))
-
-    def fight(team1, team2):
-
-        if (debug):
-            print('--------------------------------------------------')
-            print(team1)
-            print('vs')
-            print(team2)
-            print()
-
-        [start(pet, team1) for pet in team1]
-        [start(pet, team2) for pet in team2]
-
-        while (len(team1) > 0 and len(team2) > 0):
-            pet1 = team1[0]
-            pet2 = team2[0]
-                
-            if (debug):
-                print('--------------------------------------------------')
-                print(team1)
-                print('vs')
-                print(team2)
-                print()
-
-            if (debug):
-                print ('{0} fights {1}'.format(pet1, pet2))
-
-            pet1.toughness -= pet2.power
-            pet2.toughness -= pet1.power
-
-            if (pet1.toughness <= 0):
-                death(pet1, team1)
-            
-            if (pet2.toughness <= 0):
-                death(pet2, team2)
-            
-
-        if (repr(originalTeam1) not in results.keys()):
-            results[repr(originalTeam1)] = [0,0,0]
-            
-        if (len(team1) > 0 ):
-            if (debug):
-                print('Team 1 wins!')
-            wld[0] += 1
-            results[repr(originalTeam1)][0] += 1
-        elif (len(team2) > 0):
-            if (debug):
-                print('Team 2 wins!')
-            wld[1] += 1
-            results[repr(originalTeam1)][1] += 1
-        else:
-            if (debug):
-                print('Draw!')
-            wld[2] += 1
-            results[repr(originalTeam1)][2] += 1
-
-
-
-        if (debug):
-            print('--------------------------------------------------')
-            print(team1)
-            print('vs')
-            print(team2)
-            print()
-            print('==================================================')
-
-    fight(team1, team2)
-    #break
-
-print(wld)
-
-for key in results.keys():
-    print('{0} - {1}'.format(key, results[key]))
-
-print('-----')
-temp = {k: v for k, v in sorted(results.items(), key=lambda item: item[1])}
-
-for key in temp.keys():
-    print('{0} - {1}'.format(key, temp[key]))

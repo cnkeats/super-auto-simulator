@@ -2,6 +2,8 @@
 import itertools
 import random
 import copy
+import json
+import pandas
 
 class Pet:
     name =''
@@ -96,7 +98,9 @@ debug = False
 
 wld = [0,0,0]
 
+i = 0
 results = {}
+resultsTable = {}
 #for x in range(0, 50000):
 for matchup in allMatchups:
     squad1 = matchup[0]
@@ -178,8 +182,32 @@ for matchup in allMatchups:
             
             if (pet2.toughness <= 0):
                 death(pet2, team2)
-            
+        
+        if repr(originalTeam1) not in resultsTable.keys():
+            resultsTable[repr(originalTeam1)] = {}
 
+        if (repr(originalTeam2) not in resultsTable.keys()):
+            resultsTable[repr(originalTeam2)] = {}
+        
+        if repr(originalTeam1) not in resultsTable[repr(originalTeam2)].keys():
+            resultsTable[repr(originalTeam2)][repr(originalTeam1)] = [0, 0, 0]
+
+        if repr(originalTeam2) not in resultsTable[repr(originalTeam1)].keys():
+            resultsTable[repr(originalTeam1)][repr(originalTeam2)] = [0, 0, 0]
+        
+        # Win
+        if len(team1) > 0:
+            resultsTable[repr(originalTeam1)][repr(originalTeam2)][0] += 1
+            resultsTable[repr(originalTeam2)][repr(originalTeam1)][1] += 1
+        # Loss
+        elif len(team2) > 0:
+            resultsTable[repr(originalTeam1)][repr(originalTeam2)][1] += 1
+            resultsTable[repr(originalTeam2)][repr(originalTeam1)][0] += 1
+        # Draw
+        else:
+            resultsTable[repr(originalTeam1)][repr(originalTeam2)][2] += 1
+            resultsTable[repr(originalTeam2)][repr(originalTeam1)][2] += 1
+        
         if (repr(originalTeam1) not in results.keys()):
             results[repr(originalTeam1)] = [0,0,0]
             
@@ -210,7 +238,13 @@ for matchup in allMatchups:
             print('==================================================')
 
     fight(team1, team2)
-    #break
+
+    i += 1
+    if (i % 4358 == 0):
+        print('finished {0} ({1} of {2})'.format(team1, int(i / 4358), 4358 * 4358))
+    if (i / 4358 > 10):
+        break
+    #    break
 
 print(wld)
 
@@ -220,9 +254,14 @@ for key in results.keys():
 print('-----')
 temp = {k: v for k, v in sorted(results.items(), key=lambda item: item[1])}
 
+df = pandas.DataFrame(resultsTable)
+df.to_csv('output.csv')
 
-file = open('results.txt', 'w', encoding='utf-8')
-for key in temp.keys():
-    file.write('{0} - {1}\n'.format(key, temp[key]))
-    pass
+#with open('results.json', 'w') as file:
+    #json.dump(resultsTable, file)
+
+#file = open('results.txt', 'w', encoding='utf-8')
+#for key in temp.keys():
+#    file.write('{0} - {1}\n'.format(key, temp[key]))
+#    pass
 
