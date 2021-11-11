@@ -4,6 +4,7 @@ import random
 import copy
 import json
 import pandas
+import time
 
 class Pet:
     name =''
@@ -65,6 +66,7 @@ def stringToPet(string):
     output = Pet(name, power, toughness, level, 3, honey)
     return output
 
+start_time = time.time()
 
 fileSquads = []
 with open ('squads.txt') as f:
@@ -93,14 +95,23 @@ print(len(allSquads))
 allMatchups = list(itertools.product(allSquads, allSquads))
 print('{0} unique matchups'.format(len(allMatchups)))
 
+pre_df = time.time()
+
 #debug = True
 debug = False
-
-wld = [0,0,0]
 
 i = 0
 results = {}
 resultsTable = {}
+
+df = pandas.DataFrame(columns = [str(squad) for squad in allSquads], index = [str(squad) for squad in allSquads], dtype=object)
+df = df.applymap(lambda x: {'W': 0, 'L': 0, 'D': 0} if pandas.isnull(x) else x)
+
+df.to_csv('output.csv')
+
+post_df = time.time()
+last_time = post_df
+
 #for x in range(0, 50000):
 for matchup in allMatchups:
     squad1 = matchup[0]
@@ -182,71 +193,27 @@ for matchup in allMatchups:
             
             if (pet2.toughness <= 0):
                 death(pet2, team2)
-        
-        if repr(originalTeam1) not in resultsTable.keys():
-            resultsTable[repr(originalTeam1)] = {}
 
-        if (repr(originalTeam2) not in resultsTable.keys()):
-            resultsTable[repr(originalTeam2)] = {}
-        
-        if repr(originalTeam1) not in resultsTable[repr(originalTeam2)].keys():
-            resultsTable[repr(originalTeam2)][repr(originalTeam1)] = [0, 0, 0]
-
-        if repr(originalTeam2) not in resultsTable[repr(originalTeam1)].keys():
-            resultsTable[repr(originalTeam1)][repr(originalTeam2)] = [0, 0, 0]
-        
         # Win
         if len(team1) > 0:
-            resultsTable[repr(originalTeam1)][repr(originalTeam2)][0] += 1
-            resultsTable[repr(originalTeam2)][repr(originalTeam1)][1] += 1
+            df.at[str(originalTeam1), str(originalTeam2)]['W'] += 1
+            df.at[str(originalTeam2), str(originalTeam1)]['L'] += 1
         # Loss
         elif len(team2) > 0:
-            resultsTable[repr(originalTeam1)][repr(originalTeam2)][1] += 1
-            resultsTable[repr(originalTeam2)][repr(originalTeam1)][0] += 1
+            df.at[str(originalTeam1), str(originalTeam2)]['L'] += 1
+            df.at[str(originalTeam2), str(originalTeam1)]['W'] += 1
         # Draw
         else:
-            resultsTable[repr(originalTeam1)][repr(originalTeam2)][2] += 1
-            resultsTable[repr(originalTeam2)][repr(originalTeam1)][2] += 1
-        
-        if (repr(originalTeam1) not in results.keys()):
-            results[repr(originalTeam1)] = [0,0,0]
-            
-        if (len(team1) > 0 ):
-            if (debug):
-                print('Team 1 wins!')
-            wld[0] += 1
-            results[repr(originalTeam1)][0] += 1
-        elif (len(team2) > 0):
-            if (debug):
-                print('Team 2 wins!')
-            wld[1] += 1
-            results[repr(originalTeam1)][1] += 1
-        else:
-            if (debug):
-                print('Draw!')
-            wld[2] += 1
-            results[repr(originalTeam1)][2] += 1
-
-
-
-        if (debug):
-            print('--------------------------------------------------')
-            print(team1)
-            print('vs')
-            print(team2)
-            print()
-            print('==================================================')
+            df.at[str(originalTeam1), str(originalTeam2)]['D'] += 1
+            df.at[str(originalTeam2), str(originalTeam1)]['D'] += 1
 
     fight(team1, team2)
 
     i += 1
     if (i % 4358 == 0):
-        print('finished {0} ({1} of {2})'.format(team1, int(i / 4358), 4358 * 4358))
-    if (i / 4358 > 10):
-        break
-    #    break
-
-print(wld)
+        this_time = time.time()
+        print('finished {0} ({1} of {2}) in {3:0.2f} seconds - runtime {4:0.2f}s'.format(originalTeam1, int(i / len(allSquads)), len(allSquads), this_time - last_time, this_time - start_time))
+        last_time = this_time
 
 for key in results.keys():
     print('{0} - {1}'.format(key, results[key]))
@@ -254,14 +221,10 @@ for key in results.keys():
 print('-----')
 temp = {k: v for k, v in sorted(results.items(), key=lambda item: item[1])}
 
-df = pandas.DataFrame(resultsTable)
 df.to_csv('output.csv')
 
-#with open('results.json', 'w') as file:
-    #json.dump(resultsTable, file)
+print(df)
 
-#file = open('results.txt', 'w', encoding='utf-8')
-#for key in temp.keys():
-#    file.write('{0} - {1}\n'.format(key, temp[key]))
-#    pass
+post_sim = time.time()
 
+print('total runtime: {0:0.2f} seconds'.format(post_sim - post_df))
