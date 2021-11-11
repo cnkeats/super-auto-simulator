@@ -4,6 +4,7 @@ import random
 import copy
 import pandas
 import time
+import datetime
 import ast
 
 class Pet:
@@ -235,8 +236,8 @@ while (sum(wld.values()) < 100):
 
         i += 1
         if i % len(allSquads) == 0:
-            if i % 10 == 0:
-                print('finished {0} ({1} of {2}) in {3:0.2f} seconds - runtime {4:0.2f}s'.format(originalTeam1, int(i / len(allSquads)), len(allSquads), time.time() - last_time, time.time() - start_time))
+            if i % 50 == 0:
+                print('finished {0} ({1} of {2}) in {3:0.2f} seconds - runtime {4}'.format(originalTeam1, int(i / len(allSquads)), len(allSquads), time.time() - last_time, str(datetime.timedelta(seconds=int(time.time() - start_time)))))
             last_time = time.time()
 
     print('-----')
@@ -244,6 +245,6 @@ while (sum(wld.values()) < 100):
     df.to_csv('output.csv')
     print(df)
 
-    print('finished iteration {0} - total runtime: {1:0.2f} seconds'.format(int(sum(wld.values()) / 2), time.time() - iter_start))
+    print('finished iteration {0} - total runtime: {1}'.format(int(sum(wld.values()) / 2), str(datetime.timedelta(seconds=int(time.time() - iter_start)))))
 
-print('finished all iterations - total runtime: {0:0.2f} seconds'.format(time.time() - start_time))
+print('finished all iterations - total runtime: {0}'.format(str(datetime.timedelta(seconds=int(time.time() - start_time)))))
