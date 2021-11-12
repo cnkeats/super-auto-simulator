@@ -6,6 +6,7 @@ import pandas
 import time
 import datetime
 import ast
+from multiprocessing import Pool
 
 class Pet:
     name =''
@@ -67,184 +68,153 @@ def stringToPet(string):
     output = Pet(name, power, toughness, level, 3, honey)
     return output
 
-start_time = time.time()
+def battle(matchup):
+    squad1 = [stringToPet(pet) for pet in matchup[0]]
+    squad2 = [stringToPet(pet) for pet in matchup[1]]
+    return fight(squad1, squad2)
 
-fileSquads = []
-with open ('squads.txt') as f:
-    fileSquads = f.read().splitlines()
-print(len(fileSquads))
-petSquads = []
-for squadString in fileSquads:
-    memberStrings = squadString[1:-1].split(', ')
+def fight(team1, team2):
 
-    for perm in itertools.permutations(memberStrings):
-        if len(perm) > 0:
-            #print(list(perm))
-            petSquads.append(list(perm))
+    def start(pet, team):
+        if (team == team1):
+            opponent = team2
+        else:
+            opponent = team1
+        if ('Mosquito' in pet.name and len(opponent) > 0):
+            hitPet = random.choice(opponent)
+            hitPet.toughness -= pet.level
+            if (hitPet.toughness <= 0):
+                death(hitPet, opponent)
 
-print(len(petSquads))
+    def death(pet, team):
+        #print('{0} died :('.format(pet))
+        #print()
+        team.remove(pet)
 
-petSquadStrings = [list(x) for x in set(tuple(x) for x in petSquads)]
-petSquadStrings.sort()
+        L1Horses = [pet for pet in team if pet.name == 'Horse' and pet.level == 1]
+        L2Horses = [pet for pet in team if pet.name == 'Horse' and pet.level == 2]
+        boost = len(L1Horses) + 2 * len(L2Horses)
 
-allSquads = []
-for squad in petSquadStrings:
-    allSquads.append([stringToPet(pet) for pet in squad if len(pet) > 0])
-print(len(allSquads))
+        if ('Cricket' in pet.name):
+            team.insert(0, Pet('Subcricket', 1 + boost, 1, 1, 0, False))
+        elif ('Ant' in pet.name):
+            if (len(team) > 0):
+                buffPet = random.choice(team)
+                buffPet.power += 2
+                buffPet.toughness += 1
+        
+        if (pet.honey):
+            team.insert(0, Pet('Bee', 1 + boost, 1, 1, 0, False))
+    
+    originalTeam1 = [copy.deepcopy(member) for member in team1]
+    originalTeam2 = [copy.deepcopy(member) for member in team2]
 
+    [start(pet, team1) for pet in team1]
+    [start(pet, team2) for pet in team2]
 
-allMatchups = list(itertools.product(allSquads, allSquads))
-print('{0} unique matchups'.format(len(allMatchups)))
+    while (len(team1) > 0 and len(team2) > 0):
+        pet1 = team1[0]
+        pet2 = team2[0]
 
-pre_df = time.time()
+        pet1.toughness -= pet2.power
+        pet2.toughness -= pet1.power
 
-#debug = True
-debug = False
+        if (pet1.toughness <= 0):
+            death(pet1, team1)
+        
+        if (pet2.toughness <= 0):
+            death(pet2, team2)
 
+    # Win
+    if len(team1) > 0:
+        return (originalTeam1, originalTeam2, {'W': 1, 'L': 0, 'D': 0}, {'W': 0, 'L': 1, 'D': 0})
+    # Loss
+    elif len(team2) > 0:
+        return (originalTeam1, originalTeam2, {'W': 0, 'L': 1, 'D': 0}, {'W': 1, 'L': 0, 'D': 0})
+    # Draw
+    else:
+        return (originalTeam1, originalTeam2, {'W': 0, 'L': 0, 'D': 1}, {'W': 0, 'L': 0, 'D': 1})
 
-#df = pandas.DataFrame(columns = [str(squad) for squad in allSquads], index = [str(squad) for squad in allSquads], dtype=object)
-#df = df.applymap(lambda x: {'W': 0, 'L': 0, 'D': 0} if pandas.isnull(x) else x)
+#while (sum(wld.values()) < 1):
 
-post_df = time.time()
-last_time = post_df
+if __name__ == "__main__":
 
-wld = {}
+    start_time = time.time()
 
-while (sum(wld.values()) < 100):
+    fileSquads = []
+    with open ('squads.txt') as f:
+        fileSquads = f.read().splitlines()
 
-    iter_start = time.time()
+    petSquads = []
+    for squadString in fileSquads:
+        memberStrings = squadString[1:-1].split(', ')
+
+        for perm in itertools.permutations(memberStrings):
+            if len(perm) > 0:
+                #print(list(perm))
+                petSquads.append(list(perm))
+
+    #petSquadStrings = [list(x) if len(x) > 0 else [] for x in set(tuple(x) for x in petSquads)]
+    petSquadStrings = [list(x) if x[0] != '' else [] for x in set(tuple(x) for x in petSquads)]
+    petSquadStrings.sort()
+
+    #allSquads = []
+    #for squad in petSquadStrings:
+    #    allSquads.append([stringToPet(pet) for pet in squad if len(pet) > 0])
+    allSquads = petSquadStrings
+
+    allMatchups = list(itertools.product(allSquads, allSquads))
+    print('{0:,} unique matchups'.format(len(allMatchups)))
+
+    wld = {}
 
     try:
-        print('checking if df exists')
-        df
-    except NameError:
-        print('df didn\'t exist - checking csv')
-        try:
-            df = pandas.read_csv('output.csv', header=0, index_col=0)
-        except FileNotFoundError:
-            print('csv didn\'t exist')
-            df = pandas.DataFrame(columns = [str(squad) for squad in allSquads], index = [str(squad) for squad in allSquads], dtype=object)
-        print('done reading csv')
-        df = df.applymap(lambda x: {'W': 0, 'L': 0, 'D': 0} if pandas.isnull(x) else ast.literal_eval(x))
-        print('done applying map')
-    # for testing!
-    #print(df['[Ant L1 (2 / 1), Pig L1 (2 / 2), Horse L1 (1 / 1)]']['[Ant L1 (2 / 1), Pig L1 (2 / 2), Horse L1 (1 / 1)]'])
-    first_wld = df['[]']['[]']
-    wld = first_wld
-    
-    print('starting iteration {0}'.format(int(sum(wld.values()) / 2)))
-    i = 0
+        df = pandas.read_csv('output_parallel.csv', header=0, index_col=0)
+    except FileNotFoundError:
+        print('csv didn\'t exist')
+        df = pandas.DataFrame(columns = [str(squad) for squad in allSquads], index = [str(squad) for squad in allSquads], dtype=object)
+    print('done reading csv')
+    df = df.applymap(lambda x: {'W': 0, 'L': 0, 'D': 0} if pandas.isnull(x) else ast.literal_eval(x))
+    print('done applying map')
 
-    #for x in range(0, 50000):
-    for matchup in allMatchups:
-        squad1 = matchup[0]
-        squad2 = matchup[1]
+    p = Pool(4)
 
-        originalTeam1 = [copy.deepcopy(member) for member in squad1]
-        originalTeam2 = [copy.deepcopy(member) for member in squad2]
-        team1 = [copy.deepcopy(member) for member in squad1]
-        team2 = [copy.deepcopy(member) for member in squad2]
+    for i in range (0, 50):
+        print('starting iteration {0:,}'.format(i))
+        iter_start = time.time()
 
-        def start(pet, team):
-            if (team == team1):
-                opponent = team2
-            else:
-                opponent = team1
-            if ('Mosquito' in pet.name and len(opponent) > 0):
-                hitPet = random.choice(opponent)
-                if (debug):
-                    print('{0} was hit by a mosquito'.format(hitPet))
-                hitPet.toughness -= pet.level
-                if (debug):
-                    print('{0}'.format(hitPet))
-                    print()
-                if (hitPet.toughness <= 0):
-                    death(hitPet, opponent)
+        count = 0
+        for packed_data in p.imap(battle, allMatchups):
+            #print(packed_data)
+            count += 1
 
-        def death(pet, team):
-            if (debug):
-                print('{0} died :('.format(pet))
-                print()
-            team.remove(pet)
-
-            L1Horses = [pet for pet in team if pet.name == 'Horse' and pet.level == 1]
-            L2Horses = [pet for pet in team if pet.name == 'Horse' and pet.level == 2]
-            boost = len(L1Horses) + 2 * len(L2Horses)
-
-            if ('Cricket' in pet.name):
-                team.insert(0, Pet('Subcricket', 1 + boost, 1, 1, 0, False))
-            elif ('Ant' in pet.name):
-                if (len(team) > 0):
-                    buffPet = random.choice(team)
-                    buffPet.power += 2
-                    buffPet.toughness += 1
+            team1_row = str([str(data) for data in packed_data[0]])
+            team1_column = str([str(data) for data in packed_data[1]])
+            team1_results = packed_data[2]
+            team1_existing_results = df.at[team1_row, team1_column]
+            team1_new_results = {'W': team1_existing_results['W'] + team1_results['W'], 'L': team1_existing_results['L'] + team1_results['L'], 'D': team1_existing_results['D'] + team1_results['D']}
             
-            if (pet.honey):
-                team.insert(0, Pet('Bee', 1 + boost, 1, 1, 0, False))
+            team2_row = str([str(data) for data in packed_data[1]])
+            team2_column = str([str(data) for data in packed_data[0]])
+            team2_results = packed_data[3]
+            team2_existing_results = df.at[team2_row, team2_column]
+            team2_new_results = {'W': team2_existing_results['W'] + team2_results['W'], 'L': team2_existing_results['L'] + team2_results['L'], 'D': team2_existing_results['D'] + team2_results['D']}
+            
+            #print(team1_new_results)
+            #print(team2_new_results)
 
-        def fight(team1, team2):
+            df.at[team1_row, team1_column] = team1_new_results
+            df.at[team2_row, team2_column] = team2_new_results
 
-            if (debug):
-                print('--------------------------------------------------')
-                print(team1)
-                print('vs')
-                print(team2)
-                print()
+            if count % (len(allSquads) * 100) == 0 or count == len(allMatchups):
+                print('finished {0:,} of {1:,} - {2} vs {3} now at {4}\n'.format(count, len(allMatchups), team1_row, team1_column, team1_new_results))
 
-            [start(pet, team1) for pet in team1]
-            [start(pet, team2) for pet in team2]
+        print('-----')
 
-            while (len(team1) > 0 and len(team2) > 0):
-                pet1 = team1[0]
-                pet2 = team2[0]
-                    
-                if (debug):
-                    print('--------------------------------------------------')
-                    print(team1)
-                    print('vs')
-                    print(team2)
-                    print()
+        df.to_csv('output_parallel.csv')
+        print(df)
 
-                if (debug):
-                    print ('{0} fights {1}'.format(pet1, pet2))
+        print('finished iteration {0:,} - total runtime: {1}'.format(i, str(datetime.timedelta(seconds=int(time.time() - iter_start)))))
 
-                pet1.toughness -= pet2.power
-                pet2.toughness -= pet1.power
+    print('finished all iterations - total runtime: {0}'.format(str(datetime.timedelta(seconds=int(time.time() - start_time)))))
 
-                if (pet1.toughness <= 0):
-                    death(pet1, team1)
-                
-                if (pet2.toughness <= 0):
-                    death(pet2, team2)
-
-            #print(df.at[str(originalTeam1), str(originalTeam2)])
-            #print(type(df.at[str(originalTeam1), str(originalTeam2)]))
-            # Win
-            if len(team1) > 0:
-                df.at[str(originalTeam1), str(originalTeam2)]['W'] += 1
-                df.at[str(originalTeam2), str(originalTeam1)]['L'] += 1
-            # Loss
-            elif len(team2) > 0:
-                df.at[str(originalTeam1), str(originalTeam2)]['L'] += 1
-                df.at[str(originalTeam2), str(originalTeam1)]['W'] += 1
-            # Draw
-            else:
-                df.at[str(originalTeam1), str(originalTeam2)]['D'] += 1
-                df.at[str(originalTeam2), str(originalTeam1)]['D'] += 1
-
-        fight(team1, team2)
-
-        i += 1
-        if i % len(allSquads) == 0:
-            if i % 50 == 0:
-                print('finished {0} ({1} of {2}) in {3:0.2f} seconds - runtime {4}'.format(originalTeam1, int(i / len(allSquads)), len(allSquads), time.time() - last_time, str(datetime.timedelta(seconds=int(time.time() - start_time)))))
-            last_time = time.time()
-
-    print('-----')
-
-    df.to_csv('output.csv')
-    print(df)
-
-    print('finished iteration {0} - total runtime: {1}'.format(int(sum(wld.values()) / 2), str(datetime.timedelta(seconds=int(time.time() - iter_start)))))
-
-print('finished all iterations - total runtime: {0}'.format(str(datetime.timedelta(seconds=int(time.time() - start_time)))))

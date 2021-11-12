@@ -450,12 +450,12 @@ strings.sort()
 #for string in strings:
 #    print(string)
 
-#file = open('tree.txt', 'w', encoding='utf-8')
-#for pre, fill, node in RenderTree(baseNode):
-#    #print('{0}{1} - {2}g'.format(pre, node.name, node.gold))
-#    file.write('{0}{1} - {2}g\n'.format(pre, node.name, node.gold))
-#    pass
-#file.close()
+file = open('tree.txt', 'w', encoding='utf-8')
+for pre, fill, node in RenderTree(baseNode):
+    #print('{0}{1} - {2}g'.format(pre, node.name, node.gold))
+    file.write('{0}{1} - {2}g\n'.format(pre, node.name, node.gold))
+    pass
+file.close()
 
 file = open('temp.txt', 'w', encoding='utf-8')
 for node in allSquadNodes:
@@ -480,13 +480,13 @@ unique = list(set(strings))
 unique.sort()
 print('\n{0} unique squads'.format(len(unique)))
 
-#file = open('squads.txt', 'w', encoding='utf-8')
-#for squad in unique:
-#    #print('{0}{1} - {2}g'.format(pre, node.name, node.gold))
-#    file.write('{0}\n'.format(squad))
-#    pass
+file = open('squads.txt', 'w', encoding='utf-8')
+for squad in unique:
+    #print('{0}{1} - {2}g'.format(pre, node.name, node.gold))
+    file.write('{0}\n'.format(squad))
+    pass
 
-#file.close()
+file.close()
 
 #print(temp)
 #print(len(temp))
