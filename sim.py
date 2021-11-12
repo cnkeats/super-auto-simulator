@@ -403,6 +403,10 @@ while (len(leaves) > 0):
                         squad = copy.deepcopy(leaf.squad)
                         # Iterate over the of the squad
                         for (buffIndex, buffie) in enumerate(squad):
+                            
+                            # Copy the copy or we end up with illegal squads in this loop
+                            choiceCopy = copy.deepcopy(choice)
+
                             # Prebuff squad is a copy of the existing squad
                             preBuffSquad = copy.deepcopy(squad)
                             
@@ -451,9 +455,18 @@ strings.sort()
 #    #print('{0}{1} - {2}g'.format(pre, node.name, node.gold))
 #    file.write('{0}{1} - {2}g\n'.format(pre, node.name, node.gold))
 #    pass
-
 #file.close()
 
+file = open('temp.txt', 'w', encoding='utf-8')
+for node in allSquadNodes:
+    line = str(node)
+    line = line.replace(r'Node('//'', '')
+    line = line.replace('[/]', ']\n    --> [')
+    line = line.replace(')/]', ')\n    --> [')
+    file.write(line)
+    file.write('\n\n')
+
+file.close()
 
 print('\n{0} final nodes'.format(len(allSquadNodes)))
 
