@@ -460,9 +460,15 @@ strings.sort()
 file = open('temp.txt', 'w', encoding='utf-8')
 for node in allSquadNodes:
     line = str(node)
-    line = line.replace(r'Node('//'', '')
-    line = line.replace('[/]', ']\n    --> [')
-    line = line.replace(')/]', ')\n    --> [')
+    line = line.replace('Node(\'//', '')
+    line = line.replace(']/[', ']\n    --> [')
+    line = line.replace(')/[', ')\n    --> [')
+
+    temp0 = line.split('-->')
+    temp1 = [part for part in temp0 if 'DONE' not in part]
+
+    line = ''.join(temp1)
+
     file.write(line)
     file.write('\n\n')
 
