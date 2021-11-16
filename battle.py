@@ -72,17 +72,14 @@ start_time = time.time()
 fileSquads = []
 with open ('squads.txt') as f:
     fileSquads = f.read().splitlines()
-print(len(fileSquads))
+    
 petSquads = []
 for squadString in fileSquads:
     memberStrings = squadString[1:-1].split(', ')
-
     for perm in itertools.permutations(memberStrings):
         if len(perm) > 0:
-            #print(list(perm))
             petSquads.append(list(perm))
 
-print(len(petSquads))
 
 petSquadStrings = [list(x) for x in set(tuple(x) for x in petSquads)]
 petSquadStrings.sort()
@@ -90,20 +87,12 @@ petSquadStrings.sort()
 allSquads = []
 for squad in petSquadStrings:
     allSquads.append([stringToPet(pet) for pet in squad if len(pet) > 0])
-print(len(allSquads))
 
 
 allMatchups = list(itertools.product(allSquads, allSquads))
 print('{0} unique matchups'.format(len(allMatchups)))
 
 pre_df = time.time()
-
-#debug = True
-debug = False
-
-
-#df = pandas.DataFrame(columns = [str(squad) for squad in allSquads], index = [str(squad) for squad in allSquads], dtype=object)
-#df = df.applymap(lambda x: {'W': 0, 'L': 0, 'D': 0} if pandas.isnull(x) else x)
 
 post_df = time.time()
 last_time = post_df
@@ -127,8 +116,6 @@ while (sum(wld.values()) < 100):
         print('done reading csv')
         df = df.applymap(lambda x: {'W': 0, 'L': 0, 'D': 0} if pandas.isnull(x) else ast.literal_eval(x))
         print('done applying map')
-    # for testing!
-    #print(df['[Ant L1 (2 / 1), Pig L1 (2 / 2), Horse L1 (1 / 1)]']['[Ant L1 (2 / 1), Pig L1 (2 / 2), Horse L1 (1 / 1)]'])
     first_wld = df['[]']['[]']
     wld = first_wld
     
@@ -152,19 +139,11 @@ while (sum(wld.values()) < 100):
                 opponent = team1
             if ('Mosquito' in pet.name and len(opponent) > 0):
                 hitPet = random.choice(opponent)
-                if (debug):
-                    print('{0} was hit by a mosquito'.format(hitPet))
                 hitPet.toughness -= pet.level
-                if (debug):
-                    print('{0}'.format(hitPet))
-                    print()
                 if (hitPet.toughness <= 0):
                     death(hitPet, opponent)
 
         def death(pet, team):
-            if (debug):
-                print('{0} died :('.format(pet))
-                print()
             team.remove(pet)
 
             L1Horses = [pet for pet in team if pet.name == 'Horse' and pet.level == 1]
@@ -184,29 +163,12 @@ while (sum(wld.values()) < 100):
 
         def fight(team1, team2):
 
-            if (debug):
-                print('--------------------------------------------------')
-                print(team1)
-                print('vs')
-                print(team2)
-                print()
-
             [start(pet, team1) for pet in team1]
             [start(pet, team2) for pet in team2]
 
             while (len(team1) > 0 and len(team2) > 0):
                 pet1 = team1[0]
                 pet2 = team2[0]
-                    
-                if (debug):
-                    print('--------------------------------------------------')
-                    print(team1)
-                    print('vs')
-                    print(team2)
-                    print()
-
-                if (debug):
-                    print ('{0} fights {1}'.format(pet1, pet2))
 
                 pet1.toughness -= pet2.power
                 pet2.toughness -= pet1.power
@@ -217,8 +179,6 @@ while (sum(wld.values()) < 100):
                 if (pet2.toughness <= 0):
                     death(pet2, team2)
 
-            #print(df.at[str(originalTeam1), str(originalTeam2)])
-            #print(type(df.at[str(originalTeam1), str(originalTeam2)]))
             # Win
             if len(team1) > 0:
                 df.at[str(originalTeam1), str(originalTeam2)]['W'] += 1
@@ -235,10 +195,6 @@ while (sum(wld.values()) < 100):
         fight(team1, team2)
 
         i += 1
-        if i % len(allSquads) == 0:
-            if i % 50 == 0:
-                print('finished {0} ({1} of {2}) in {3:0.2f} seconds - runtime {4}'.format(originalTeam1, int(i / len(allSquads)), len(allSquads), time.time() - last_time, str(datetime.timedelta(seconds=int(time.time() - start_time)))))
-            last_time = time.time()
 
     print('-----')
 
